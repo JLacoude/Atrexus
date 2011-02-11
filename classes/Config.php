@@ -1,7 +1,9 @@
 <?php
 /**
- * Configurator class. Used to load .ini configuration files.
+ * Config
+ * Used to load .ini configuration files
  *
+ * @package Atrexus
  * @author Jeremy Lacoude
  */
 class Config{
@@ -24,9 +26,12 @@ class Config{
    * @access public
    */
   public function __construct($pathToIniFile){
-    $conf = parse_ini_file($pathToIniFile);
-    if($conf === false){
+    if(!file_exists($pathToIniFile)){
       throw(new Exception('Configuration file not found'));
+    }
+    $conf = @parse_ini_file($pathToIniFile);
+    if($conf === false){
+      throw(new Exception('Configuration file erroneous'));
     }
     $this->configuration = $conf;
   }
@@ -42,7 +47,13 @@ class Config{
    * @access public
    */
   public function get($key, $default = null){
-    return isset($this->configuration[$key])?$this->configuration[$key]:$default;
+    if(!isset($this->configuration[$key])){
+      if($default == null){
+	return null;
+      }
+      $this->configuration[$key] = $default;
+    }
+    return $this->configuration[$key];
   }
 
   /**
