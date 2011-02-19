@@ -76,6 +76,7 @@ class Debug{
       ' at line '.$line.
       ' '.$levelName.' : '.$message.
       '. Trace : '.print_r(debug_backtrace(), true).'
+
 ';
     error_log($log, 3, __DIR__.'/../debug/errors_'.date('Y-m-d').'.txt');
 

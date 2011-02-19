@@ -65,7 +65,7 @@ class Controller{
   public function __construct(IDependencyInjectionContainer $DI){
     $this->_DI = $DI;
     // Load user
-    //$this->_user = new User($DI);
+    $this->_user = new User($DI);
     // Register configuration
     $this->_config = $DI->getConfigurator();
     // Get language configuration
@@ -105,6 +105,7 @@ class Controller{
     $lang = $this->_lang;
     $messages = $this->_messenger->get();
     $this->_messenger->flush();
+    $user = $this->_user;
     include __DIR__.'/../templates/header.tpl';
     include __DIR__.'/../templates/'.get_called_class().'/'.$this->_action.'.tpl';
     include __DIR__.'/../templates/footer.tpl';

@@ -37,10 +37,12 @@ class DependencyInjectionContainer implements IDependencyInjectionContainer{
   public function getDb(){
     if(!isset($this->_instances['db']) || !is_a($this->_instances['db'], 'ExtendedPDO')){
       $this->_instances['db'] = new ExtendedPDO($this->_config->get('db.driver').':host='.
-						$this->_config->get('db.host').';dbname='.
+						$this->_config->get('db.host').';port='.
+						$this->_config->get('db.port').';dbname='.
 						$this->_config->get('db.database'),
 						$this->_config->get('db.user'),
-						$this->_config->get('db.pass'));
+						$this->_config->get('db.pass'),
+						array(PDO::MYSQL_ATTR_INIT_COMMAND => 'SET NAMES "UTF8"'));
       $this->_instances['db']->setAttribute(PDO::ATTR_ERRMODE, 
 					    PDO::ERRMODE_EXCEPTION);
     }
@@ -60,15 +62,15 @@ class DependencyInjectionContainer implements IDependencyInjectionContainer{
   }
 
   /**
-   * Returns a RequestManager object
+   * Returns a SqlQueriesManager object
    *
    * @return object
    */
-  public function getRequestManager(){
-    if(!isset($this->_instances['requestManager']) || !is_a($this->_instances['requestManager'], 'ISqlRequestManager')){
-      $this->_instances['requestManager'] = new RequestManager($this->_config->get('db.driver'));
+  public function getSqlQueriesManager(){
+    if(!isset($this->_instances['SqlQueriesManager']) || !is_a($this->_instances['SqlQueriesManager'], 'SqlQueriesManager')){
+      $this->_instances['SqlQueriesManager'] = new SqlQueriesManager($this->_config->get('db.driver'));
     }
-    return $this->_instances['requestManager'];
+    return $this->_instances['SqlQueriesManager'];
   }
 
   /**

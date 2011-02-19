@@ -28,11 +28,11 @@ interface IDependencyInjectionContainer{
   public function getSessionManager();
 
   /**
-   * Returns a RequestManager object
+   * Returns a SqlQueriesManager object
    *
    * @return object
    */
-  public function getRequestManager();
+  public function getSqlQueriesManager();
 
   /**
    * Returns a Language object
