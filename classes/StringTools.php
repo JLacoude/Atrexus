@@ -21,7 +21,7 @@ class StringTools{
   public static function noPathFilterInput($type, $var, $filter = FILTER_DEFAULT, $options = null){
     $data = filter_input($type, $var, $filter, $options);
     if(!empty($data)){
-      $data = $this->filterPath($data);
+      $data = StringTools::filterPath($data);
     }
     return $data;
   }

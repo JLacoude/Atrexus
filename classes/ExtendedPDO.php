@@ -13,12 +13,21 @@ class ExtendedPDO extends PDO implements IDbExtension{
   private $_transactionStarted = false;
 
   /**
+   * Level of transaction
+   * @var integer
+   */
+  private $_transactionLevel = 0;
+
+  /**
    * Start a transaction if none has been started.
    * @return boolean
    */  
   public function beginTransaction(){
     if(!$this->_transactionStarted){
       $this->_transactionStarted = parent::beginTransaction();
+    }
+    if($this->_transactionStarted){
+      $this->_transactionLevel++;
     }
     return $this->_transactionStarted;
   }
@@ -29,8 +38,11 @@ class ExtendedPDO extends PDO implements IDbExtension{
    */
   public function commit(){
     if($this->_transactionStarted){
-      $this->_transactionStarted = false;
-      return parent::commit();
+      $this->_transactionLevel--;
+      if($this->_transactionLevel <= 0){
+	$this->_transactionStarted = !parent::commit();
+	return !$this->_transactionStarted;
+      }
     }
     return true;
   }
@@ -42,6 +54,7 @@ class ExtendedPDO extends PDO implements IDbExtension{
   public function rollBack(){
     if($this->_transactionStarted){
       $this->_transactionStarted = false;
+      $this->_transactionLevel = 0;
       return parent::rollBack();
     }
     return true;

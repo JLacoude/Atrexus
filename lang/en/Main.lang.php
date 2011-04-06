@@ -1,6 +1,7 @@
 <?php
 $lines = array('login' => 'Login',
 	       'username' => 'Username',
-	       'password' => 'Password',
+	       'pass' => 'Password',
+	       'login' => 'Connect',
 	       'register' => 'Create a new account',
 	       'lost' => 'Lost password');

@@ -106,6 +106,7 @@ class Controller{
     $messages = $this->_messenger->get();
     $this->_messenger->flush();
     $user = $this->_user;
+    $form = $this->_form;
     include __DIR__.'/../templates/header.tpl';
     include __DIR__.'/../templates/'.get_called_class().'/'.$this->_action.'.tpl';
     include __DIR__.'/../templates/footer.tpl';
