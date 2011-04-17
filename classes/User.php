@@ -25,6 +25,12 @@ class User{
   private $_userInfos;
 
   /**
+   * @var object Instance of a IPersonna object
+   * @access private
+   */
+  private $_personna;
+
+  /**
    * @var object ISqlRequestManager instance
    * @access private
    */
@@ -63,6 +69,15 @@ class User{
    */
   public function isRegistered(){
     return !empty($this->_userInfos['login']);
+  }
+
+  /**
+   * Returns if current user is playing
+   *
+   * @return bool
+   */
+  public function isPlaying(){
+    return !empty($this->_personna);
   }
 
   /**
