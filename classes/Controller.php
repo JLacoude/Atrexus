@@ -56,6 +56,13 @@ class Controller{
   protected $_DI;
 
   /**
+   * Datas stored for the template
+   *
+   * @var array
+   */
+  protected $_data;
+
+  /**
    * Constructor, initialize the member vars. Then call the action found in the query string.
    *
    * @param object An instance of an IDependencyInjectionContainer object.
@@ -110,5 +117,39 @@ class Controller{
     include __DIR__.'/../templates/header.tpl';
     include __DIR__.'/../templates/'.get_called_class().'/'.$this->_action.'.tpl';
     include __DIR__.'/../templates/footer.tpl';
+  }
+
+  /**
+   * Function used to set data for the data array
+   *
+   * @param string $name Name of the data
+   * @param mixed $value Data to store
+   */
+  public function __set($name, $value){
+    if(property_exists($this, $name)){
+      throw(new Exception('Restricted property'));
+    }
+    $this->_data[$name] = $value;
+  }
+
+  /**
+   * Function used to get data from the data array
+   *
+   * @param string $name Name of the data
+   */
+  public function __get($name){
+    if(!isset($this->_data[$name])){
+      throw(new Exception('Unknown property'));
+    }
+    return $this->_data[$name];
+  }
+
+  /**
+   * Checks if a theorically inaccessible data is accessible through our own __set and __get
+   *
+   *  @param string $name Name of the data to access
+   */
+  public function __isset($name){
+    return isset($this->_data[$name]);
   }
 }

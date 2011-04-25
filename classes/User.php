@@ -5,13 +5,7 @@
  * @package Atrexus
  * @author Jeremy Lacoude
  */
-class User{
-  /**
-   * @var object PDO instance
-   * @access private
-   */
-  private $_db;
- 
+class User extends DatabaseDriven{
   /**
    * @var object ISessionManager instance
    * @access private
@@ -31,34 +25,14 @@ class User{
   private $_personna;
 
   /**
-   * @var object ISqlRequestManager instance
-   * @access private
-   */
-  private $_requests;
-
-  /**
-   * @var object IMessenger instance
-   * @access private
-   */
-  private $_messenger;
-
-  /**
-   * @var object ILanguage instance
-   * @access private
-   */
-  private $_lang;
-
-  /**
    * @desc Class contructor
    * @param object IDependencyInjectionContainer instance
    * @access public
    */
   public function __construct(IDependencyInjectionContainer $DI){
-    $this->_db = $DI->getDb();
+    parent::__construct($DI);
+    $this->_personna = new Personna($DI);
     $this->_sessionManager = $DI->getSessionManager();
-    $this->_requests = $DI->getSqlQueriesManager();
-    $this->_messenger = $DI->getMessenger();
-    $this->_lang = $DI->getLanguage('User');
     $this->identify();
   }
 
@@ -77,7 +51,7 @@ class User{
    * @return bool
    */
   public function isPlaying(){
-    return !empty($this->_personna);
+    return $this->_personna->inGame();
   }
 
   /**
@@ -240,6 +214,11 @@ class User{
       $stmt = $this->_db->prepare($sql);
       $stmt->execute(array(':id' => $userId));
       $this->_userInfos = $stmt->fetch();
+      
+      $personnaId = $this->_sessionManager->get('personnaId');
+      if(!empty($personnaId)){
+	$this->_personna->load($personnaId);
+      }
     }
     catch(Exception $e){
       $this->_db->rollBack();
@@ -287,5 +266,45 @@ class User{
    */
   private function _getClientIp(){
     return $_SERVER['REMOTE_ADDR'];
+  }
+
+  /**
+   * Get magic function to get user infos
+   *
+   * @param string $key Key name of the value to get
+   */
+  public function __get($key){
+    return isset($this->_userInfos[$key])?$this->_userInfos[$key]:null;
+  }
+
+  /**
+   * Used by users to enter battlefields. Creates a new personna if needed.
+   *
+   * @param int $battlefieldId Id of the chosen battlefield
+   * @param int $hiveId Id of a hive if a new personna must be created
+   */
+  public function enterBattlefield($battlefieldId, $hiveId = null){
+    $this->_db->beginTransaction();
+    try{
+      $sql = $this->_requests->get('getUserPersonnaInBattlefield');
+      $stmt = $this->_db->prepare($sql);
+      $stmt->execute(array(':userId' => $this->_userInfos['ID'],
+			   ':battlefieldId' => $battlefieldId));
+      $personna = $stmt->fetch();
+      if(empty($personna)){
+	$personnaId = $this->_personna->create($this->_userInfos['ID'], $battlefieldId, $hiveId);
+	$this->_sessionManager->set('personnaId', $personnaId);
+      }
+      else{
+	$this->_personna->load($personna['ID']);
+	$this->_sessionManager->set('personnaId', $personna['ID']);
+      }
+    }
+    catch(Exception $e){
+      $this->_db->rollBack();
+      throw($e);
+    }
+    $this->_db->commit();
+    return true;
   }
 }
