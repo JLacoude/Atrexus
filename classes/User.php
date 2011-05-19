@@ -55,6 +55,33 @@ class User extends DatabaseDriven{
   }
 
   /**
+   * Returns the objects visible to a user in game
+   *
+   * @return array
+   */
+  public function getView(){
+    return $this->_personna->getView();
+  }
+
+  /**
+   * Returns ruleset of personna's battlefield
+   *
+   * @return array
+   */
+  public function getRuleset(){
+    return $this->_personna->getRuleset();
+  }
+
+  /**
+   * Returns datas about the current user personna
+   *
+   * @return array
+   */
+  public function getPersonnaData(){
+    return $this->_personna->getData();
+  }
+
+  /**
    * Identify a user
    *
    * @return int User ID

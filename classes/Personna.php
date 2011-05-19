@@ -1,10 +1,32 @@
 <?php
+/**
+ * Personna class
+ *
+ * @package Atrexus
+ * @author Jeremy Lacoude
+ */
 class Personna extends DatabaseDriven implements IPersonna{
   /**
    * @var array personna data
    * @access private
    */
   private $_data = array();
+
+  /**
+   * @var object Instance of IConfig object storing the rulesets
+   * @access private
+   */
+  private $_ruleset;
+
+  /**
+   * Constructor. Loads ruleset and call parents constructor
+   *
+   * @param object $DI Instance of IdependencyInjectionContainer
+   */
+  public function __construct($DI){
+      $this->_ruleset = new Config(__DIR__.'/../config/defaultRuleset.ini');
+      parent::__construct($DI);
+  }
 
   /**
    * Creates a personna for a user on a battlefield
@@ -25,8 +47,7 @@ class Personna extends DatabaseDriven implements IPersonna{
 			   ':battlefieldId' => $battlefieldId));
       $headquarter = $stmt->fetch();
       // Get ruleset data
-      $ruleset = new Config(__DIR__.'/../config/defaultRuleset.ini');
-      $maxAP = $ruleset->get('personna.maxAp');
+      $maxAP = $this->_ruleset->get('personna.maxAp');
       // Create a personna for this battlefield
       $sql = $this->_requests->get('createPersonna');
       $stmt = $this->_db->prepare($sql);
@@ -60,16 +81,17 @@ class Personna extends DatabaseDriven implements IPersonna{
 	throw(new Exception('Personna not found'));
       }
       // Get ruleset data
-      $ruleset = new Config(__DIR__.'/../config/defaultRuleset.ini');
-      $apGain = $ruleset->get('personna.apGain');
+      $apGain = $this->_ruleset->get('personna.apGain');
+      $period = $this->_ruleset->get('game.period');
+      $maxAp = $this->_ruleset->get('personna.maxAp');
       // New AP value
-      $ap = $personna['AP'] + $apGain / 3600 * $personna['time_from_last_regen'];
-      $ap = max(0, min(100, $ap));
+      $ap = $personna['AP'] + $apGain / $period * $personna['time_from_last_regen'];
+      $ap = max(0, min($maxAp, $ap));
       // If new AP < 100 we may have some seconds to remove from the time of last_regen
       $secondsToRemove = 0;
-      if($ap < 100){
+      if($ap < $maxAp){
 	$difference = ceil($ap) - $ap;
-	$secondsToRemove = $difference * 3600 / $apGain;
+	$secondsToRemove = $difference * $period / $apGain;
 	$ap = floor($ap);
       }
 
@@ -98,4 +120,65 @@ class Personna extends DatabaseDriven implements IPersonna{
   public function inGame(){
     return !empty($this->_data['ID']);
   }
+
+  /**
+   * Returns an array which contains everything in view of the personna
+   *
+   * @return array
+   */
+  public function getView(){
+    $this->_db->beginTransaction();
+    try{
+      $view = array();
+      $maxView = $this->_ruleset->get('game.viewDistance');
+      $sql = $this->_requests->get('getView');
+      $stmt = $this->_db->prepare($sql);
+      $stmt->execute(array(':battlefield' => $this->_data['battlefield_id'],
+			   ':x' => $this->_data['X'],
+			   ':y' => $this->_data['Y'],
+			   ':distance' => $maxView));
+      $result = $stmt->fetchAll();
+      foreach($result as $item){
+	if(!isset($view[$item['X']])){
+	  $view[$item['X']] = array();
+	}
+	if(!empty($item['hq_id'])){
+	  $view[$item['X']][$item['Y']] = new Headquarter($item['hq_id'], $this->_DI);
+	}
+	else{
+	  $view[$item['X']][$item['Y']] = new Soldier($item['soldier_id'], $this->_DI);
+	  // Copy values relevant to soldiers into the object
+	  foreach(array('X', 'Y', 'hive_id', 'HP', 'AP', 'updated') as $key){
+	    $view[$item['X']][$item['Y']]->{$key} = $item[$key];
+	  }
+	}
+	$view[$item['X']][$item['Y']]->isEnnemy = $this->_data['hive_id'] != $item['hive_id'];
+      }
+    }
+    catch(Exception $e){
+      $this->_db->rollBack();
+      throw($e);
+    }
+    $this->_db->commit();
+    return $view;
+  }
+
+  /**
+   * Returns ruleset of personna's battlefield
+   *
+   * @return array
+   */
+  public function getRuleset(){
+    return $this->_ruleset->getAll();
+  }
+
+  /**
+   * Returns datas about the current user personna
+   *
+   * @return array
+   */
+  public function getData(){
+    return $this->_data;
+  }
+
 }

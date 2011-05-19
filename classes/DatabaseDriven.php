@@ -31,11 +31,18 @@ class DatabaseDriven{
   protected $_lang;
 
   /**
+   * An IDependencyInjectionContainer instance.
+   * @var object
+   */
+  protected $_DI;
+
+  /**
    * @desc Class contructor
    * @param object IDependencyInjectionContainer instance
    * @access public
    */
   public function __construct(IDependencyInjectionContainer $DI){
+    $this->_DI = $DI;
     $this->_db = $DI->getDb();
     $this->_requests = $DI->getSqlQueriesManager();
     $this->_messenger = $DI->getMessenger();

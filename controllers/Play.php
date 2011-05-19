@@ -13,6 +13,9 @@ class Play extends Controller{
     if(!$this->_user->isPlaying()){
       Url::redirect(Url::generate('Battlefields'));
     }
+    $this->viewData = $this->_user->getView();
+    $this->ruleset = $this->_user->getRuleset();
+    $this->personna = $this->_user->getPersonnaData();
   }
 
   /**

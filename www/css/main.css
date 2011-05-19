@@ -1,0 +1,22 @@
+html, body{
+  background:#fff;
+}
+
+table, tr, td, th{
+  border-collapse: collapse;
+  border: solid 1px #000;
+}
+
+#mainBoard td{
+  min-width: 4em;
+  height: 4em;
+  text-align:center;
+}
+
+#mainBoard th{
+  text-align:center;
+}
+
+#mainBoard .ennemy{
+  background:#f66;
+}

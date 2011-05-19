@@ -2,6 +2,7 @@
 <html>
 <head>
   <title><?=$config->get('html.defaultTitle')?></title>
+  <link rel="stylesheet" type="text/css" href="css/main.css"/>
 </head>
 <body>
 <ul>
