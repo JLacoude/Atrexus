@@ -1,4 +1,4 @@
-<td>
+<td<?php if($this->isEnnemy):?> class="ennemy"<?php endif;?>>
 <?php $this->_form->start(Url::generate('Play')); ?>
   <h4><?=$this->_lang->get('soldier')?> <?=$this->ID?></h4>
   <p>
