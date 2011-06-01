@@ -334,4 +334,17 @@ class User extends DatabaseDriven{
     $this->_db->commit();
     return true;
   }
+
+  /**
+   * Creates a soldier on current battlefield
+   *
+   * @param int $X X coordinate of the soldier to create
+   * @param int $Y Y coordinate of the soldier to create
+   */
+  public function createSoldier($X, $Y){
+    if(!$this->isPlaying()){
+      $this->_messenger->add('error', $this->_lang->get('notInGame'));
+    }
+    $this->_personna->createSoldier($X, $Y);
+  }
 }

@@ -36,4 +36,21 @@ class Play extends Controller{
     $this->_messenger->saveInSession();
     Url::redirect($urlToRedirect);
   }
+
+  /**
+   * Create a soldier on the current battlefield
+   */
+  public function createSoldier(){
+    $urlToRedirect = Url::generate('Play');
+    $posted = $this->_form->getPosted();
+    if(empty($posted) || !isset($posted['X'], $posted['Y'])){
+      // Logs an error message
+      $this->_messenger->add('error', $this->_lang->get('invalidForm'));
+    }
+    else{
+      $this->_user->createSoldier($posted['X'], $posted['Y']);
+    }
+    $this->_messenger->saveInSession();
+    Url::redirect($urlToRedirect);
+  }
 }
