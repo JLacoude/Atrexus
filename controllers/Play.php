@@ -53,4 +53,21 @@ class Play extends Controller{
     $this->_messenger->saveInSession();
     Url::redirect($urlToRedirect);
   }
+
+  /**
+   * Binds current personna to a new position
+   */
+  public function bindTo(){
+    $urlToRedirect = Url::generate('Play');
+    $posted = $this->_form->getPosted();
+    if(empty($posted) || !isset($posted['positionId'])){
+      // Logs an error message
+      $this->_messenger->add('error', $this->_lang->get('invalidForm'));
+    }
+    else{
+      $this->_user->bindTo($posted['positionId']);
+    }
+    $this->_messenger->saveInSession();
+    Url::redirect($urlToRedirect);
+  }
 }

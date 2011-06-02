@@ -154,6 +154,8 @@ class Personna extends DatabaseDriven implements IPersonna{
 	  }
 	  $view[$item['X']][$item['Y']]->isEnnemy = $this->_data['hive_id'] != $item['hive_id'];
 	}
+	$view[$item['X']][$item['Y']]->positionId = $item['position_id'];
+	$view[$item['X']][$item['Y']]->isCurrent = ($item['X'] == $this->_data['X'] && $item['Y'] == $this->_data['Y']);
       }
 
       // Set actions cells where available
@@ -267,6 +269,46 @@ class Personna extends DatabaseDriven implements IPersonna{
 	  $stmt = $this->_db->prepare($sql);
 	  $stmt->execute(array(':ap' => $createAp, ':id' => $this->_data['ID']));
 	}
+      }
+    }
+    catch(Exception $e){
+      $this->_db->rollBack();
+      throw($e);
+    }
+    $this->_db->commit();
+  }
+
+  /**
+   * Binds current personna to a new position
+   *
+   * @param int $positionId ID of the position to bind to
+   */
+  public function bindTo($positionId){
+    $this->_db->beginTransaction();
+    try{
+      // Check if position can be used
+      $distance = $this->_ruleset->get('game.viewDistance');
+      $sql = $this->_requests->get('getHivePosition');
+      $stmt = $this->_db->prepare($sql);
+      $stmt->execute(array(':id' => $positionId));
+      $position = $stmt->fetch();
+      if(empty($position)){
+	$this->_messenger->add('error', $this->_lang->get('positionNotFound'));
+      }
+      else if($position['hive_id'] != $this->_data['hive_id']){
+	$this->_messenger->add('error', $this->_lang->get('isEnnemyPosition'));
+      }
+      else if($position['battlefield_id'] != $this->_data['battlefield_id']){
+	$this->_messenger->add('error', $this->_lang->get('wrongBattlefield'));
+      }
+      else if(abs($position['X'] - $this->_data['X']) > $distance ||
+	      abs($position['Y'] - $this->_data['Y']) > $distance){
+	$this->_messenger->add('error', $this->_lang->get('positionTooFar'));
+      }
+      else{
+	$sql = $this->_requests->get('bindTo');
+	$stmt = $this->_db->prepare($sql);
+	$stmt->execute(array(':position' => $positionId, ':id' => $this->_data['ID']));
       }
     }
     catch(Exception $e){

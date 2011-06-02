@@ -347,4 +347,16 @@ class User extends DatabaseDriven{
     }
     $this->_personna->createSoldier($X, $Y);
   }
+
+  /**
+   * Binds current personna to a new position
+   *
+   * @param int $positionId ID of the position to bind to
+   */
+  public function bindTo($positionId){
+    if(!$this->isPlaying()){
+      $this->_messenger->add('error', $this->_lang->get('notInGame'));
+    }
+    $this->_personna->bindTo($positionId);
+  }
 }

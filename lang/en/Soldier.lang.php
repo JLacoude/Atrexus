@@ -1,3 +1,3 @@
 <?php
 $lines = array('soldier' => 'Soldier',
-	       'details' => 'Infos');
+	       'bind' => 'Use');
