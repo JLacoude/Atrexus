@@ -351,4 +351,16 @@ class User extends DatabaseDriven{
     }
     $this->_personna->moveSoldier($X, $Y);
   }
+
+  /**
+   * Make current controlled soldier attack an ennemy soldier
+   *
+   * @param int $soldierId Id of the soldier to attack
+   */
+  public function attackSoldier($soldierId){
+    if(!$this->isPlaying()){
+      $this->_messenger->add('error', $this->_lang->get('notInGame'));
+    }
+    $this->_personna->attackSoldier($soldierId);
+  }
 }

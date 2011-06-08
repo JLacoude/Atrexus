@@ -135,7 +135,7 @@ class Personna extends DatabaseDriven implements IPersonna{
 	  $gameItem->isEnnemy = $this->_data['hive_id'] != $item['hq_hive'];
 	}
 	else{
-	  $gameItem = new Soldier($item['soldier_id'], $this->_DI);
+	  $gameItem = new Soldier($item['soldier_id'], $this->_DI, true);
 	  // Copy values relevant to soldiers into the object
 	  foreach(array('X', 'Y', 'hive_id', 'HP', 'AP', 'updated') as $key){
 	    $gameItem->{$key} = $item[$key];
@@ -371,6 +371,45 @@ class Personna extends DatabaseDriven implements IPersonna{
    * @param int $soldierId Id of the soldier to attack
    */
   public function attackSoldier($soldierId){
+    $this->_db->beginTransaction();
+    try{
+      $attackAp = $this->_ruleset->get('soldier.apPerAttack');
+      $personna = $this->_db->fetchFirstRequest('getPersonnaSoldier', array(':id' => $this->_data['ID']));
+      if(empty($personna)){
+	$this->_messenger->add('error', $this->_lang->get('noPersonna'));
+      }
+      else if(empty($personna['soldier_id'])){
+	$this->_messenger->add('error', $this->_lang->get('notASoldier'));
+      }
+      else if($personna['AP'] < $attackAp ||
+	      $personna['soldier_ap'] < $attackAp){
+	$this->_messenger->add('error', sprintf($this->_lang->get('notEnoughAP'), $personna['AP'] . ' - ' . $personna['soldier_ap'], $attackAp));
+      }
+      $target = new Soldier($soldierId, $this->_DI);
+      if(empty($target->ID)){
+	$this->_messenger->add('error', $this->_lang->get('soldierNotFound'));
+      }
+      else if($personna['battlefield_id'] != $target->battlefield_id ||
+	      abs($personna['X'] - $target->X) > 1 ||
+	      abs($personna['Y'] - $target->Y) > 1){
+	$this->_messenger->add('error', $this->_lang->get('targetTooFar'));
+      }
+      else if($personna['hive_id'] == $target->hive_id){
+	$this->_messenger->add('error', $this->_lang->get('invalidTarget'));
+      }
+      else{
+	$target->receiveDamage($this->_ruleset->get('soldier.damages'));
+	$this->_db->executeRequest('soldierUseAP', array(':id' => $personna['soldier_id'],
+							 ':ap' => $attackAp));
+	$this->_db->executeRequest('personnaUseAP', array(':id' => $this->_data['ID'],
+							  ':ap' => $attackAp));
+      }
+    }
+    catch(Exception $e){
+      $this->_db->rollBack();
+      throw($e);
+    }
+    $this->_db->commit();
   }
 
   /**

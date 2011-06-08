@@ -7,4 +7,8 @@ $lines = array('notEnoughAP' => 'Not enough AP, you have %s (needed %s)',
 	       'isEnnemyPosition' => 'Can not bind to ennemy item',
 	       'wrongBattlefield' => 'Item is on the wrong battlefield',
 	       'positionTooFar' => 'Item is too far away',
-	       'coordinatesTooFar' => 'You can not create a soldier this far');
+	       'coordinatesTooFar' => 'You can not create a soldier this far',
+	       'notASoldier' => 'You have to be bound to a soldier to do this',
+	       'soldierNotFound' => 'Error while loading current soldier',
+	       'targetTooFar' => 'Target too far',
+	       'invalidTarget' => 'Invalid target');
