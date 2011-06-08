@@ -107,10 +107,7 @@ class User extends DatabaseDriven{
     $logged = false;
     $this->_db->beginTransaction();
     try{
-      $sql = $this->_requests->get('getUserByLogin');
-      $stmt = $this->_db->prepare($sql);
-      $stmt->execute(array(':login' => $login));
-      $userInfos = $stmt->fetch();
+      $userInfos = $this->_db->fetchFirstRequest('getUserByLogin', array(':login' => $login));
       if(!empty($userInfos)){
 	$hasher = new PasswordHash(8, false);
 	if($hasher->checkPassword($pass, $userInfos['password'])){
@@ -162,20 +159,15 @@ class User extends DatabaseDriven{
     $this->_db->beginTransaction();
     $registered = false;
     try{
-      $sql = $this->_requests->get('getUserByLogin');
-      $stmt = $this->_db->prepare($sql);
-      $stmt->execute(array(':login' => $login));
-      $userInfos = $stmt->fetch();
+      $userInfos = $this->_db->fetchFirstRequest('getUserByLogin', array(':login' => $login));
       if(empty($userInfos)){
 	$hasher = new PasswordHash(8, false);
 	$hashedPassword = $hasher->hashPassword($password);
 	if(!empty($hashedPassword)){
-	  $sql = $this->_requests->get('registerUser');
-	  $stmt = $this->_db->prepare($sql);
-	  $stmt->execute(array(':login' => $login,
-			       ':password' => $hashedPassword,
-			       ':email' => $email,
-			       ':id' => $this->_userInfos['ID']));
+	  $stmt = $this->_db->executeRequest('registerUser', array(':login' => $login,
+								   ':password' => $hashedPassword,
+								   ':email' => $email,
+								   ':id' => $this->_userInfos['ID']));
 	  if($stmt->rowCount() <= 0){
 	    $this->_messenger->add('error', $this->_lang->get('registerUserError'));
 	  }
@@ -209,10 +201,7 @@ class User extends DatabaseDriven{
     // Check if we already have a user with this IP in database
     $this->_db->beginTransaction();
     try{
-      $sql = $this->_requests->get('getUserByIP');
-      $stmt = $this->_db->prepare($sql);
-      $stmt->execute(array(':ip' => $clientIp));
-      $this->_userInfos = $stmt->fetch();
+      $this->_userInfos = $this->_db->fetchFirstRequest('getUserByIP', array(':ip' => $clientIp));
       if(empty($this->_userInfos)){
 	$userId = $this->_createUser($clientIp);
 	$this->_userInfos = array('ID' => $userId,
@@ -237,11 +226,7 @@ class User extends DatabaseDriven{
     }
     $this->_db->beginTransaction();
     try{
-      $sql = $this->_requests->get('getUser');
-      $stmt = $this->_db->prepare($sql);
-      $stmt->execute(array(':id' => $userId));
-      $this->_userInfos = $stmt->fetch();
-      
+      $this->_userInfos = $this->_db->fetchFirstRequest('getUser', array(':id' => $userId));
       $personnaId = $this->_sessionManager->get('personnaId');
       if(!empty($personnaId)){
 	$this->_personna->load($personnaId);
@@ -265,10 +250,7 @@ class User extends DatabaseDriven{
     $id = 0;
     $this->_db->beginTransaction();
     try{
-      $sql = $this->_requests->get('createNewUser');
-      $stmt = $this->_db->prepare($sql);
-      $stmt->execute(array(':ip' => $userIP));
-      $id = $this->_db->lastInsertId();
+      $id = $this->_db->executeCreateRequest('createNewUser', array(':ip' => $userIP));
     }
     catch(Exception $e){
       $this->_db->rollBack();
@@ -313,11 +295,8 @@ class User extends DatabaseDriven{
   public function enterBattlefield($battlefieldId, $hiveId = null){
     $this->_db->beginTransaction();
     try{
-      $sql = $this->_requests->get('getUserPersonnaInBattlefield');
-      $stmt = $this->_db->prepare($sql);
-      $stmt->execute(array(':userId' => $this->_userInfos['ID'],
-			   ':battlefieldId' => $battlefieldId));
-      $personna = $stmt->fetch();
+      $personna = $this->_db->fetchFirstRequest('getUserPersonnaInBattlefield', array(':userId' => $this->_userInfos['ID'],
+										      ':battlefieldId' => $battlefieldId));
       if(empty($personna)){
 	$personnaId = $this->_personna->create($this->_userInfos['ID'], $battlefieldId, $hiveId);
 	$this->_sessionManager->set('personnaId', $personnaId);

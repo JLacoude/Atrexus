@@ -45,6 +45,7 @@ class DependencyInjectionContainer implements IDependencyInjectionContainer{
 						array(PDO::MYSQL_ATTR_INIT_COMMAND => 'SET NAMES "UTF8"'));
       $this->_instances['db']->setAttribute(PDO::ATTR_ERRMODE, 
 					    PDO::ERRMODE_EXCEPTION);
+      $this->_instances['db']->setRequestManager($this->getSqlQueriesManager());
     }
     return $this->_instances['db'];
   }

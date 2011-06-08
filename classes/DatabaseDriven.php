@@ -13,12 +13,6 @@ class DatabaseDriven{
   protected $_db;
 
   /**
-   * @var object ISqlRequestManager instance
-   * @access protected
-   */
-  protected $_requests;
-
-  /**
    * @var object IMessenger instance
    * @access protected
    */
@@ -44,7 +38,6 @@ class DatabaseDriven{
   public function __construct(IDependencyInjectionContainer $DI){
     $this->_DI = $DI;
     $this->_db = $DI->getDb();
-    $this->_requests = $DI->getSqlQueriesManager();
     $this->_messenger = $DI->getMessenger();
     $this->_lang = $DI->getLanguage(get_called_class());
   }

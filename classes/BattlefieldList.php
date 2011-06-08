@@ -17,19 +17,13 @@ class BattlefieldList extends DatabaseDriven implements IBattlefieldList{
     $userId = $user->ID;
     try{
       if($user->isRegistered()){
-	$sql = $this->_requests->get('getBattlefieldListForUser');
+	$list = $this->_db->fetchAllRequest('getBattlefieldListForUser', array(':userId' => $userId));
       }
       else{
-	$sql = $this->_requests->get('getBattlefieldListForAnonUser');
+	$list = $this->_db->fetchAllRequest('getBattlefieldListForAnonUser', array(':userId' => $userId));
       }
-      $stmt = $this->_db->prepare($sql);
-      $stmt->execute(array(':userId' => $userId));
-      $list = $stmt->fetchAll();
       foreach($list as $i => $battlefield){
-	$sql = $this->_requests->get('getBattlefieldHiveList');
-	$stmt = $this->_db->prepare($sql);
-	$stmt->execute(array(':battlefieldId' => $battlefield['ID']));
-	$list[$i]['hiveList'] = $stmt->fetchAll();	
+	$list[$i]['hiveList'] = $this->_db->fetchAllRequest('getBattlefieldHiveList', array(':battlefieldId' => $battlefield['ID']));	
       }
     }
     catch(Exception $e){

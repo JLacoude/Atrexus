@@ -41,21 +41,15 @@ class Personna extends DatabaseDriven implements IPersonna{
     $this->_db->beginTransaction();
     try{
       // Get position of a random headquarter
-      $sql = $this->_requests->get('getRandomHeadquarter');
-      $stmt = $this->_db->prepare($sql);
-      $stmt->execute(array(':hiveId' => $hiveId,
-			   ':battlefieldId' => $battlefieldId));
-      $headquarter = $stmt->fetch();
+      $stmt = $this->_db->fetchFirstRequest('getRandomHeadquarter', array(':hiveId' => $hiveId,
+									  ':battlefieldId' => $battlefieldId));
       // Get ruleset data
       $maxAP = $this->_ruleset->get('personna.maxAp');
       // Create a personna for this battlefield
-      $sql = $this->_requests->get('createPersonna');
-      $stmt = $this->_db->prepare($sql);
-      $stmt->execute(array(':userId' => $userId,
-			   ':hiveId' => $hiveId,
-			   ':positionId' => $headquarter['ID'],
-			   ':AP' => $maxAP));
-      $personnaId = $this->_db->lastInsertId();
+      $personnaId = $this->_db->executeCreateRequest('createPersonna', array(':userId' => $userId,
+									     ':hiveId' => $hiveId,
+									     ':positionId' => $headquarter['ID'],
+									     ':AP' => $maxAP));
       $this->load($personnaId);
     }
     catch(Exception $e){
@@ -73,10 +67,7 @@ class Personna extends DatabaseDriven implements IPersonna{
   public function load($id){
     $this->_db->beginTransaction();
     try{
-      $sql = $this->_requests->get('getPersonna');
-      $stmt = $this->_db->prepare($sql);
-      $stmt->execute(array(':id' => $id));
-      $personna = $stmt->fetch();
+      $personna = $this->_db->fetchFirstRequest('getPersonna', array(':id' => $id));
       if(empty($personna)){
 	throw(new Exception('Personna not found'));
       }
@@ -96,11 +87,9 @@ class Personna extends DatabaseDriven implements IPersonna{
       }
 
       if($ap != $personna['AP']){
-	$sql = $this->_requests->get('updatePersonna');
-	$stmt = $this->_db->prepare($sql);
-	$stmt->execute(array(':id' => $id,
-			     ':ap' => $ap,
-			     ':toRemove' => $secondsToRemove));
+	$this->_db->executeRequest('updatePersonna', array(':id' => $id,
+							   ':ap' => $ap,
+							   ':toRemove' => $secondsToRemove));
 	$personna['AP'] = $ap;
       }
 
@@ -131,13 +120,10 @@ class Personna extends DatabaseDriven implements IPersonna{
     try{
       $view = array();
       $maxView = $this->_ruleset->get('game.viewDistance');
-      $sql = $this->_requests->get('getView');
-      $stmt = $this->_db->prepare($sql);
-      $stmt->execute(array(':battlefield' => $this->_data['battlefield_id'],
-			   ':x' => $this->_data['X'],
-			   ':y' => $this->_data['Y'],
-			   ':distance' => $maxView));
-      $result = $stmt->fetchAll();
+      $result = $this->_db->fetchAllRequest('getView', array(':battlefield' => $this->_data['battlefield_id'],
+							     ':x' => $this->_data['X'],
+							     ':y' => $this->_data['Y'],
+							     ':distance' => $maxView));
       foreach($result as $item){
 	$distance = max(abs($item['X'] - $this->_data['X']), abs($item['Y'] - $this->_data['Y']));
 	if(!isset($view[$item['X']])){
@@ -255,10 +241,7 @@ class Personna extends DatabaseDriven implements IPersonna{
     $this->_db->beginTransaction();
     try{
       // Get personna AP and position
-      $sql = $this->_requests->get('getPersonnaHeadquarter');
-      $stmt = $this->_db->prepare($sql);
-      $stmt->execute(array(':id' => $this->_data['ID']));
-      $personna = $stmt->fetch();
+      $personna = $this->_db->fetchFirstRequest('getPersonnaHeadquarter', array(':id' => $this->_data['ID']));      
       if(empty($personna)){
 	$this->_messenger->add('error', $this->_lang->get('noPersonna'));
       }
@@ -279,21 +262,16 @@ class Personna extends DatabaseDriven implements IPersonna{
 	}
 	else{
 	  // Creates the soldier's position
-	  $sql = $this->_requests->get('createPosition');
-	  $stmt = $this->_db->prepare($sql);
-	  $stmt->execute(array(':X' => $X, ':Y' => $Y, ':battlefield' => $this->_data['battlefield_id']));
-	  $positionId = $this->_db->lastInsertId();
+	  $positionId = $this->_db->executeCreateRequest('createPosition', array(':X' => $X, 
+										 ':Y' => $Y, 
+										 ':battlefield' => $this->_data['battlefield_id']));
 	  // Create the soldier
-	  $sql = $this->_requests->get('createSoldier');
-	  $stmt = $this->_db->prepare($sql);
-	  $stmt->execute(array(':hive' => $this->_data['hive_id'],
-			       ':position' => $positionId,
-			       ':HP' => $this->_ruleset->get('soldier.maxHP'),
-			       ':AP' => $this->_ruleset->get('soldier.maxAp')));
+	  $this->_db->executeCreateRequest('createSoldier', array(':hive' => $this->_data['hive_id'],
+								  ':position' => $positionId,
+								  ':HP' => $this->_ruleset->get('soldier.maxHP'),
+								  ':AP' => $this->_ruleset->get('soldier.maxAp')));
 	  // Update personna
-	  $sql = $this->_requests->get('personnaUseAP');
-	  $stmt = $this->_db->prepare($sql);
-	  $stmt->execute(array(':ap' => $createAp, ':id' => $this->_data['ID']));
+	  $this->_db->executeRequest('personnaUseAP', array(':ap' => $createAp, ':id' => $this->_data['ID']));
 	}
       }
     }
@@ -314,10 +292,7 @@ class Personna extends DatabaseDriven implements IPersonna{
     try{
       // Check if position can be used
       $distance = $this->_ruleset->get('game.viewDistance');
-      $sql = $this->_requests->get('getHivePosition');
-      $stmt = $this->_db->prepare($sql);
-      $stmt->execute(array(':id' => $positionId));
-      $position = $stmt->fetch();
+      $position = $this->_db->fetchFirstRequest('getHivePosition', array(':id' => $positionId));
       if(empty($position)){
 	$this->_messenger->add('error', $this->_lang->get('positionNotFound'));
       }
@@ -332,9 +307,7 @@ class Personna extends DatabaseDriven implements IPersonna{
 	$this->_messenger->add('error', $this->_lang->get('positionTooFar'));
       }
       else{
-	$sql = $this->_requests->get('bindTo');
-	$stmt = $this->_db->prepare($sql);
-	$stmt->execute(array(':position' => $positionId, ':id' => $this->_data['ID']));
+	$this->_db->executeRequest('bindTo', array(':position' => $positionId, ':id' => $this->_data['ID']));
       }
     }
     catch(Exception $e){
@@ -359,10 +332,7 @@ class Personna extends DatabaseDriven implements IPersonna{
       else{
 	$moveAp = $this->_ruleset->get('soldier.apPerMvt');
 	// Get personna AP and position
-	$sql = $this->_requests->get('getPersonnaSoldier');
-	$stmt = $this->_db->prepare($sql);
-	$stmt->execute(array(':id' => $this->_data['ID']));
-	$personna = $stmt->fetch();
+	$personna = $this->_db->fetchFirstRequest('getPersonnaSoldier', array(':id' => $this->_data['ID']));
 	if(empty($personna)){
 	  $this->_messenger->add('error', $this->_lang->get('noPersonna'));
 	}
@@ -378,19 +348,13 @@ class Personna extends DatabaseDriven implements IPersonna{
 	  $this->_messenger->add('error', $this->_lang->get('coordinatesTooFar'));
 	}
 	else{
-	  $sql = $this->_requests->get('movePosition');
-	  $stmt = $this->_db->prepare($sql);
-	  $stmt->execute(array(':id' => $personna['position_id'],
-			       ':x' => $X,
-			       ':y' => $Y));
-	  $sql = $this->_requests->get('soldierUseAP');
-	  $stmt = $this->_db->prepare($sql);
-	  $stmt->execute(array(':id' => $personna['soldier_id'],
-			       ':ap' => $moveAp));
-	  $sql = $this->_requests->get('personnaUseAP');
-	  $stmt = $this->_db->prepare($sql);
-	  $stmt->execute(array(':id' => $this->_data['ID'],
-			       ':ap' => $moveAp));
+	  $this->_db->executeRequest('movePosition', array(':id' => $personna['position_id'],
+							   ':x' => $X,
+							   ':y' => $Y));
+	  $this->_db->executeRequest('soldierUseAP', array(':id' => $personna['soldier_id'],
+							   ':ap' => $moveAp));
+	  $this->_db->executeRequest('personnaUseAP', array(':id' => $this->_data['ID'],
+							    ':ap' => $moveAp));
 	}
       }
     }
@@ -402,6 +366,14 @@ class Personna extends DatabaseDriven implements IPersonna{
   }
 
   /**
+   * Make current controlled soldier attack an ennemy soldier
+   *
+   * @param int $soldierId Id of the soldier to attack
+   */
+  public function attackSoldier($soldierId){
+  }
+
+  /**
    * Checks if something is already at some coordinates of current battlefield
    *
    * @param int $X X coordinate
@@ -410,10 +382,9 @@ class Personna extends DatabaseDriven implements IPersonna{
    * @return bool true if something is there
    */
   private function _checkCoordinate($X, $Y){
-    $sql = $this->_requests->get('getPositionByCoordinates');
-    $stmt = $this->_db->prepare($sql);
-    $stmt->execute(array(':X' => $X, ':Y' => $Y, ':battlefield' => $this->_data['battlefield_id']));
-    $position = $stmt->fetch();
+    $position = $this->_db->fetchFirstRequest('getPositionByCoordinates', array(':X' => $X, 
+										':Y' => $Y, 
+										':battlefield' => $this->_data['battlefield_id']));
     return !empty($position);
   }
 }
