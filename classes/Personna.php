@@ -139,52 +139,82 @@ class Personna extends DatabaseDriven implements IPersonna{
 			   ':distance' => $maxView));
       $result = $stmt->fetchAll();
       foreach($result as $item){
+	$distance = max(abs($item['X'] - $this->_data['X']), abs($item['Y'] - $this->_data['Y']));
 	if(!isset($view[$item['X']])){
 	  $view[$item['X']] = array();
 	}
 	if(!empty($item['hq_id'])){
-	  $view[$item['X']][$item['Y']] = new Headquarter($item['hq_id'], $this->_DI);
-	  $view[$item['X']][$item['Y']]->isEnnemy = $this->_data['hive_id'] != $item['hq_hive'];
+	  $gameItem = new Headquarter($item['hq_id'], $this->_DI);
+	  $gameItem->costToCapture = $item['cost_to_capture'];
+	  $gameItem->isEnnemy = $this->_data['hive_id'] != $item['hq_hive'];
 	}
 	else{
-	  $view[$item['X']][$item['Y']] = new Soldier($item['soldier_id'], $this->_DI);
+	  $gameItem = new Soldier($item['soldier_id'], $this->_DI);
 	  // Copy values relevant to soldiers into the object
 	  foreach(array('X', 'Y', 'hive_id', 'HP', 'AP', 'updated') as $key){
-	    $view[$item['X']][$item['Y']]->{$key} = $item[$key];
+	    $gameItem->{$key} = $item[$key];
 	  }
-	  $view[$item['X']][$item['Y']]->isEnnemy = $this->_data['hive_id'] != $item['hive_id'];
+	  $gameItem->isEnnemy = $this->_data['hive_id'] != $item['hive_id'];
 	}
-	$view[$item['X']][$item['Y']]->positionId = $item['position_id'];
-	$view[$item['X']][$item['Y']]->isCurrent = ($item['X'] == $this->_data['X'] && $item['Y'] == $this->_data['Y']);
+	$gameItem->isCurrent = $distance == 0;
+	// Add "bindTo" action to items from same hive
+	if(!$gameItem->isEnnemy && !$gameItem->isCurrent){
+	  $action = new Action('bindToItem', $this->_DI);
+	  $action->positionId = $item['position_id'];
+	  $gameItem->actions[] = $action;
+	}
+	if($this->_data['is_soldier'] &&
+	   $distance == 1 && 
+	   $gameItem->isEnnemy){
+	  // Add "attackSoldier" action to ennemy soldier in range
+	  $attackCost = $this->_ruleset->get('soldier.apPerAttack');
+	  if($this->_data['AP'] >= $attackCost &&
+	     $this->_data['soldier_AP'] >= $attackCost &&
+	     $gameItem instanceof Soldier){
+	    $action = new Action('attackSoldier', $this->_DI);
+	    $action->soldierId = $item['soldier_id'];
+	    $gameItem->actions[] = $action;
+	  }
+	  // Add "captureHeadquarter" action
+	  if($gameItem instanceof Headquarter &&
+	     $this->_data['AP'] >= $gameItem->costToCapture &&
+	     $this->_data['soldier_AP'] >= $gameItem->costToCapture){
+	    $gameItem->actions[] = new Action('captureHeadquarter', $this->_DI);
+	  }
+	}
+	$view[$item['X']][$item['Y']] = $gameItem;
       }
-
       // Set actions cells where available
-      $around = array(array(-1, 1),
-		      array(0, 1),
-		      array(1, 1),
-		      array(-1, 0),
-		      array(1, 0),
-		      array(-1, -1),
-		      array(0, -1),
-		      array(1, -1));
-      if($view[$this->_data['X']][$this->_data['Y']] instanceof Headquarter){
-	$actionType = 'headquarter';
-	$cost = $this->_ruleset->get('soldier.apCost');
-      } 
-      else{
-	$actionType = 'soldier';
+      if($this->_data['is_soldier']){
 	$cost = $this->_ruleset->get('soldier.apPerMvt');
+	$actionType = 'moveSoldier';
       }
-      foreach($around as $offset){
-	$x = $this->_data['X'] + $offset[0];
-	$y = $this->_data['Y'] + $offset[1];
-	if(!isset($view[$x][$y])){
-	  $view[$x][$y] = new ActionCell(0, $this->_DI);
-	  $view[$x][$y]->type = $actionType;
-	  $view[$x][$y]->cost =  $cost;
-	  $view[$x][$y]->availableAP = $this->_data['AP'];
-	  $view[$x][$y]->X =  $x;
-	  $view[$x][$y]->Y =  $y;
+      else{
+	$cost = $this->_ruleset->get('soldier.apCost');
+	$actionType = 'createSoldier';
+      }
+      if($this->_data['AP'] >= $cost &&
+	 (!$this->_data['is_soldier'] || $this->_data['soldier_AP'] >= $cost)){
+	$around = array(array(-1, 1),
+			array(0, 1),
+			array(1, 1),
+			array(-1, 0),
+			array(1, 0),
+			array(-1, -1),
+			array(0, -1),
+			array(1, -1));
+	foreach($around as $offset){
+	  $x = $this->_data['X'] + $offset[0];
+	  $y = $this->_data['Y'] + $offset[1];
+	  if(!isset($view[$x][$y])){
+	    $actionCell = new ActionCell(0, $this->_DI);
+	    $action = new Action($actionType, $this->_DI);
+	    $action->X = $x;
+	    $action->Y = $y;
+	    $action->cost = $cost;
+	    $actionCell->actions[] = $action;
+	    $view[$x][$y] = $actionCell;
+	  }
 	}
       }
     }
@@ -244,11 +274,7 @@ class Personna extends DatabaseDriven implements IPersonna{
       }
       else{
 	// Checks if the targeted cell is free
-	$sql = $this->_requests->get('getPositionByCoordinates');
-	$stmt = $this->_db->prepare($sql);
-	$stmt->execute(array(':X' => $X, ':Y' => $Y, ':battlefield' => $this->_data['battlefield_id']));
-	$position = $stmt->fetch();
-	if(!empty($position)){
+	if($this->_checkCoordinate($X, $Y)){
 	  $this->_messenger->add('error', $this->_lang->get('cellNotEmpty'));
 	}
 	else{
@@ -316,5 +342,78 @@ class Personna extends DatabaseDriven implements IPersonna{
       throw($e);
     }
     $this->_db->commit();
+  }
+
+  /**
+   * Moves a soldier on current battlefield
+   *
+   * @param int $X X coordinate of the new position
+   * @param int $Y Y coordinate of the new position
+   */
+  public function moveSoldier($X, $Y){
+    $this->_db->beginTransaction();
+    try{
+      if($this->_checkCoordinate($X, $Y)){
+	$this->_messenger->add('error', $this->_lang->get('cellNotEmpty'));
+      }
+      else{
+	$moveAp = $this->_ruleset->get('soldier.apPerMvt');
+	// Get personna AP and position
+	$sql = $this->_requests->get('getPersonnaSoldier');
+	$stmt = $this->_db->prepare($sql);
+	$stmt->execute(array(':id' => $this->_data['ID']));
+	$personna = $stmt->fetch();
+	if(empty($personna)){
+	  $this->_messenger->add('error', $this->_lang->get('noPersonna'));
+	}
+	else if(empty($personna['soldier_id'])){
+	  $this->_messenger->add('error', $this->_lang->get('notASoldier'));
+	}
+	else if($personna['AP'] < $moveAp ||
+		$personna['soldier_ap'] < $moveAp){
+	  $this->_messenger->add('error', sprintf($this->_lang->get('notEnoughAP'), $this->_data['AP'] . ' - ' . $personna['soldier_ap'], $moveAp));
+	}
+	else if(abs($personna['X'] - $X) > 1 || 
+		abs($personna['Y'] - $Y) > 1){
+	  $this->_messenger->add('error', $this->_lang->get('coordinatesTooFar'));
+	}
+	else{
+	  $sql = $this->_requests->get('movePosition');
+	  $stmt = $this->_db->prepare($sql);
+	  $stmt->execute(array(':id' => $personna['position_id'],
+			       ':x' => $X,
+			       ':y' => $Y));
+	  $sql = $this->_requests->get('soldierUseAP');
+	  $stmt = $this->_db->prepare($sql);
+	  $stmt->execute(array(':id' => $personna['soldier_id'],
+			       ':ap' => $moveAp));
+	  $sql = $this->_requests->get('personnaUseAP');
+	  $stmt = $this->_db->prepare($sql);
+	  $stmt->execute(array(':id' => $this->_data['ID'],
+			       ':ap' => $moveAp));
+	}
+      }
+    }
+    catch(Exception $e){
+      $this->_db->rollBack();
+      throw($e);
+    }
+    $this->_db->commit();
+  }
+
+  /**
+   * Checks if something is already at some coordinates of current battlefield
+   *
+   * @param int $X X coordinate
+   * @param int $Y Y coordinate
+   *
+   * @return bool true if something is there
+   */
+  private function _checkCoordinate($X, $Y){
+    $sql = $this->_requests->get('getPositionByCoordinates');
+    $stmt = $this->_db->prepare($sql);
+    $stmt->execute(array(':X' => $X, ':Y' => $Y, ':battlefield' => $this->_data['battlefield_id']));
+    $position = $stmt->fetch();
+    return !empty($position);
   }
 }

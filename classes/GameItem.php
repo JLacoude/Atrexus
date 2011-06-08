@@ -41,6 +41,7 @@ class GameItem extends DatabaseDriven implements IDisplayable{
    */
   public function __construct($id, IDependencyInjectionContainer $DI){
     $this->_data['ID'] = $id;
+    $this->_data['actions'] = new ArrayObject(array(), ArrayObject::ARRAY_AS_PROPS);
     // Get language configuration
     $this->_lang = $DI->getLanguage(get_called_class());
     // Get form helper

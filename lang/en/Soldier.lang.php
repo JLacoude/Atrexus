@@ -1,3 +1,2 @@
 <?php
-$lines = array('soldier' => 'Soldier',
-	       'bind' => 'Use');
+$lines = array('soldier' => 'Soldier');

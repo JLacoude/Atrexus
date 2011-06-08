@@ -359,4 +359,17 @@ class User extends DatabaseDriven{
     }
     $this->_personna->bindTo($positionId);
   }
+
+  /**
+   * Moves a soldier on current battlefield
+   *
+   * @param int $X X coordinate of the new position
+   * @param int $Y Y coordinate of the new position
+   */
+  public function moveSoldier($X, $Y){
+    if(!$this->isPlaying()){
+      $this->_messenger->add('error', $this->_lang->get('notInGame'));
+    }
+    $this->_personna->moveSoldier($X, $Y);
+  }
 }
