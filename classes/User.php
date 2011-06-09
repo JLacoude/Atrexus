@@ -363,4 +363,16 @@ class User extends DatabaseDriven{
     }
     $this->_personna->attackSoldier($soldierId);
   }
+
+  /**
+   * Capture a headquarter
+   *
+   * @param int $headquarterId ID of the headquarter to capture
+   */
+  public function captureHeadquarter($headquarterId){
+    if(!$this->isPlaying()){
+      $this->_messenger->add('error', $this->_lang->get('notInGame'));
+    }
+    $this->_personna->captureHeadquarter($headquarterId);
+  }
 }

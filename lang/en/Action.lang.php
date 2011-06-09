@@ -4,4 +4,5 @@ $lines = array('create' => 'Create a soldier',
 	       'submitCreate' => 'Create',
 	       'submitMove' => 'Move',
 	       'bind' => 'Use',
-	       'attack' => 'Attack');
+	       'attack' => 'Attack',
+	       'capture' => 'Capture');

@@ -9,6 +9,7 @@ $lines = array('notEnoughAP' => 'Not enough AP, you have %s (needed %s)',
 	       'positionTooFar' => 'Item is too far away',
 	       'coordinatesTooFar' => 'You can not create a soldier this far',
 	       'notASoldier' => 'You have to be bound to a soldier to do this',
-	       'soldierNotFound' => 'Error while loading current soldier',
+	       'soldierNotFound' => 'Error while loading targeted soldier',
+	       'headquarterNotFound' => 'Error while loading targeted headquarter',
 	       'targetTooFar' => 'Target too far',
 	       'invalidTarget' => 'Invalid target');

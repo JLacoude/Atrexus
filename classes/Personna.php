@@ -165,7 +165,9 @@ class Personna extends DatabaseDriven implements IPersonna{
 	  if($gameItem instanceof Headquarter &&
 	     $this->_data['AP'] >= $gameItem->costToCapture &&
 	     $this->_data['soldier_AP'] >= $gameItem->costToCapture){
-	    $gameItem->actions[] = new Action('captureHeadquarter', $this->_DI);
+	    $action = new Action('captureHeadquarter', $this->_DI);
+	    $action->headquarterId = $item['hq_id'];
+	    $gameItem->actions[] = $action;
 	  }
 	}
 	$view[$item['X']][$item['Y']] = $gameItem;
@@ -385,24 +387,77 @@ class Personna extends DatabaseDriven implements IPersonna{
 	      $personna['soldier_ap'] < $attackAp){
 	$this->_messenger->add('error', sprintf($this->_lang->get('notEnoughAP'), $personna['AP'] . ' - ' . $personna['soldier_ap'], $attackAp));
       }
-      $target = new Soldier($soldierId, $this->_DI);
-      if(empty($target->ID)){
-	$this->_messenger->add('error', $this->_lang->get('soldierNotFound'));
+      else{
+	$target = new Soldier($soldierId, $this->_DI);
+	if(empty($target->ID)){
+	  $this->_messenger->add('error', $this->_lang->get('soldierNotFound'));
+	}
+	else if($personna['battlefield_id'] != $target->battlefield_id ||
+		abs($personna['X'] - $target->X) > 1 ||
+		abs($personna['Y'] - $target->Y) > 1){
+	  $this->_messenger->add('error', $this->_lang->get('targetTooFar'));
+	}
+	else if($personna['hive_id'] == $target->hive_id){
+	  $this->_messenger->add('error', $this->_lang->get('invalidTarget'));
+	}
+	else{
+	  $target->receiveDamage($this->_ruleset->get('soldier.damages'));
+	  $this->_db->executeRequest('soldierUseAP', array(':id' => $personna['soldier_id'],
+							   ':ap' => $attackAp));
+	  $this->_db->executeRequest('personnaUseAP', array(':id' => $this->_data['ID'],
+							    ':ap' => $attackAp));
+	}
       }
-      else if($personna['battlefield_id'] != $target->battlefield_id ||
-	      abs($personna['X'] - $target->X) > 1 ||
-	      abs($personna['Y'] - $target->Y) > 1){
-	$this->_messenger->add('error', $this->_lang->get('targetTooFar'));
+    }
+    catch(Exception $e){
+      $this->_db->rollBack();
+      throw($e);
+    }
+    $this->_db->commit();
+  }
+
+  /**
+   * Capture a headquarter
+   *
+   * @param int $headquarterId ID of the headquarter to capture
+   */
+  public function captureHeadquarter($headquarterId){
+    $this->_db->beginTransaction();
+    try{
+      $personna = $this->_db->fetchFirstRequest('getPersonnaSoldier', array(':id' => $this->_data['ID']));
+      if(empty($personna)){
+	$this->_messenger->add('error', $this->_lang->get('noPersonna'));
       }
-      else if($personna['hive_id'] == $target->hive_id){
-	$this->_messenger->add('error', $this->_lang->get('invalidTarget'));
+      else if(empty($personna['soldier_id'])){
+	$this->_messenger->add('error', $this->_lang->get('notASoldier'));
       }
       else{
-	$target->receiveDamage($this->_ruleset->get('soldier.damages'));
-	$this->_db->executeRequest('soldierUseAP', array(':id' => $personna['soldier_id'],
-							 ':ap' => $attackAp));
-	$this->_db->executeRequest('personnaUseAP', array(':id' => $this->_data['ID'],
-							  ':ap' => $attackAp));
+	$target = $this->_db->fetchFirstRequest('getHeadquarter', array(':id' => $headquarterId));
+	if(empty($target)){
+	  $this->_messenger->add('error', $this->_lang->get('headquarterNotFound'));
+	}
+	else if($personna['AP'] < $target['cost_to_capture'] ||
+		$personna['soldier_ap'] < $target['cost_to_capture']){
+	  $this->_messenger->add('error', sprintf($this->_lang->get('notEnoughAP'), 
+						  $personna['AP'] . ' - ' . $personna['soldier_ap'], 
+						  $target['cost_to_capture']));
+	}
+	else if($personna['battlefield_id'] != $target['battlefield_id'] ||
+		abs($personna['X'] - $target['X']) > 1 ||
+		abs($personna['Y'] - $target['Y']) > 1){
+	  $this->_messenger->add('error', $this->_lang->get('targetTooFar'));
+	}
+	else if($personna['hive_id'] == $target['hive_id']){
+	  $this->_messenger->add('error', $this->_lang->get('invalidTarget'));
+	}
+	else{
+	  $this->_db->executeRequest('updateHeadquarterHive', array(':id' => $headquarterId,
+								    ':hive' => $personna['hive_id']));
+	  $this->_db->executeRequest('soldierUseAP', array(':id' => $personna['soldier_id'],
+							   ':ap' => $target['cost_to_capture']));
+	  $this->_db->executeRequest('personnaUseAP', array(':id' => $this->_data['ID'],
+							    ':ap' => $target['cost_to_capture']));
+	}
       }
     }
     catch(Exception $e){

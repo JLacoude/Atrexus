@@ -104,4 +104,21 @@ class Play extends Controller{
     $this->_messenger->saveInSession();
     Url::redirect($urlToRedirect);
   }
+
+  /**
+   * Capture a headquarter
+   */
+  public function captureHeadquarter(){
+    $urlToRedirect = Url::generate('Play');
+    $posted = $this->_form->getPosted();
+    if(empty($posted) || !isset($posted['headquarterId'])){
+      // Logs an error message
+      $this->_messenger->add('error', $this->_lang->get('invalidForm'));
+    }
+    else{
+      $this->_user->captureHeadquarter($posted['headquarterId']);
+    }
+    $this->_messenger->saveInSession();
+    Url::redirect($urlToRedirect);
+  }
 }
