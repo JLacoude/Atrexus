@@ -268,12 +268,21 @@ class Personna extends DatabaseDriven implements IPersonna{
 										 ':Y' => $Y, 
 										 ':battlefield' => $this->_data['battlefield_id']));
 	  // Create the soldier
-	  $this->_db->executeCreateRequest('createSoldier', array(':hive' => $this->_data['hive_id'],
-								  ':position' => $positionId,
-								  ':HP' => $this->_ruleset->get('soldier.maxHP'),
-								  ':AP' => $this->_ruleset->get('soldier.maxAp')));
+	  $soldierId = $this->_db->executeCreateRequest('createSoldier', array(':hive' => $this->_data['hive_id'],
+									       ':position' => $positionId,
+									       ':HP' => $this->_ruleset->get('soldier.maxHP'),
+									       ':AP' => $this->_ruleset->get('soldier.maxAp')));
 	  // Update personna
 	  $this->_db->executeRequest('personnaUseAP', array(':ap' => $createAp, ':id' => $this->_data['ID']));
+	  // Create log
+	  $this->_db->executeRequest('createSoldierLog', array(':user_id' => $this->_data['user_id'],
+							       ':battlefield_id' => $personna['battlefield_id'],
+							       ':by_id' => $personna['headquarter_id'],
+							       ':by_X' => $personna['X'],
+							       ':by_Y' => $personna['Y'],
+							       ':target_id' => $soldierId,
+							       ':target_X' => $X,
+							       ':target_Y' => $Y));
 	}
       }
     }
@@ -357,6 +366,12 @@ class Personna extends DatabaseDriven implements IPersonna{
 							   ':ap' => $moveAp));
 	  $this->_db->executeRequest('personnaUseAP', array(':id' => $this->_data['ID'],
 							    ':ap' => $moveAp));
+	  // Create log
+	  $this->_db->executeRequest('moveSoldierLog', array(':user_id' => $this->_data['user_id'],
+							     ':battlefield_id' => $personna['battlefield_id'],
+							     ':target_id' => $personna['soldier_id'],
+							     ':target_X' => $X,
+							     ':target_Y' => $Y));
 	}
       }
     }
@@ -401,11 +416,23 @@ class Personna extends DatabaseDriven implements IPersonna{
 	  $this->_messenger->add('error', $this->_lang->get('invalidTarget'));
 	}
 	else{
-	  $target->receiveDamage($this->_ruleset->get('soldier.damages'));
+	  $damages = $this->_ruleset->get('soldier.damages');
+	  $killed = $target->receiveDamage($damages);
 	  $this->_db->executeRequest('soldierUseAP', array(':id' => $personna['soldier_id'],
 							   ':ap' => $attackAp));
 	  $this->_db->executeRequest('personnaUseAP', array(':id' => $this->_data['ID'],
 							    ':ap' => $attackAp));
+	  // Create log
+	  $this->_db->executeRequest('attackSoldierLog', array(':user_id' => $this->_data['user_id'],
+							       ':battlefield_id' => $personna['battlefield_id'],
+							       ':by_id' => $personna['soldier_id'],
+							       ':by_X' => $personna['X'],
+							       ':by_Y' => $personna['Y'],
+							       ':target_id' => $soldierId,
+							       ':target_X' => $target->X,
+							       ':target_Y' => $target->Y,
+							       ':damages' => $damages,
+							       ':kill' => $killed));
 	}
       }
     }
@@ -457,6 +484,14 @@ class Personna extends DatabaseDriven implements IPersonna{
 							   ':ap' => $target['cost_to_capture']));
 	  $this->_db->executeRequest('personnaUseAP', array(':id' => $this->_data['ID'],
 							    ':ap' => $target['cost_to_capture']));
+	  $this->_db->executeRequest('captureHeadquarterLog', array(':user_id' => $this->_data['user_id'],
+								    ':battlefield_id' => $personna['battlefield_id'],
+								    ':by_id' => $personna['soldier_id'],
+								    ':by_X' => $personna['X'],
+								    ':by_Y' => $personna['Y'],
+								    ':target_id' => $headquarterId,
+								    ':target_X' => $target['X'],
+								    ':target_Y' => $target['Y']));
 	}
       }
     }

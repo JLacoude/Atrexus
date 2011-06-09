@@ -27,15 +27,19 @@ class Soldier extends GameItem{
    * Manage what happens to a soldier when receiving damages
    *
    * @param int $damages Amount of damage received
+   *
+   * @return bool true if the target as been killed, false otherwise
    */
   public function receiveDamage($damages){
     if($damages >= $this->HP){
       // Soldier is dead, destroy position
       $this->_db->executeRequest('deletePosition', array(':id' => $this->position_id));
+      return true;
     }
     else{
       $this->_db->executeRequest('updateSoldierHP', array(':id' => $this->ID,
 							  ':damages' => $damages));
+      return false;
     }
   }
 }
