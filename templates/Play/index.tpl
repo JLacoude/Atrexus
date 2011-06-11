@@ -1,3 +1,21 @@
+<dl id="itemStats">
+  <dt><?=$lang->get('personnaAPTitle')?></dt>
+  <dd><?=sprintf($lang->get('remainingAP'), $this->personna['AP'], $this->ruleset['personna.maxAp'])?></dd>
+   <?php $this->personna['item']->display('itemStats');?>
+</dl>
+<?php
+if(!empty($this->personna['logs'])):
+?>
+<ul id="logs">
+<?php
+foreach($this->personna['logs'] as $log):
+  $log->display('boardloglist');
+endforeach;
+?>
+</ul>
+<?php 
+endif;
+?>
 <table id="mainBoard">
   <tr>
     <td>Y\X</td>

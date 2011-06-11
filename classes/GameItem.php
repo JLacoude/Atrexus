@@ -93,9 +93,9 @@ class GameItem extends DatabaseDriven implements IDisplayable{
   /**
    * Set ruleset
    *
-   * @param object $ruleset Instance of IConfig object
+   * @param object $ruleset Instance of Config object
    */
-  public function setRuleset(IConfig $ruleset){
+  public function setRuleset(Config $ruleset){
     $this->_ruleset = $ruleset;
   }
 }

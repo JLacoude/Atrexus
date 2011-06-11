@@ -1,2 +1,3 @@
 <?php
-$lines = array();
+$lines = array('personnaAPTitle' => 'Action points:',
+	       'remainingAP' => '%s/%s AP');

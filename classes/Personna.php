@@ -92,7 +92,24 @@ class Personna extends DatabaseDriven implements IPersonna{
 							   ':toRemove' => $secondsToRemove));
 	$personna['AP'] = $ap;
       }
-
+      $personna['logs'] = array();
+      $logs = $this->_db->fetchAllRequest('getPersonnaLogs', array(':userId' => $personna['user_id'],
+								   ':battlefieldId' => $personna['battlefield_id'],
+								   ':currentItemId' => $personna['current_item_id']));
+      if(!empty($logs)){
+	foreach($logs as $log){
+	  $actionLog = new ActionLog($this->_DI);
+	  $actionLog->loadFromArray($log);
+	  $personna['logs'][] = $actionLog;
+	}
+      }
+      if($personna['is_soldier']){
+	$personna['item'] = new Soldier($personna['current_item_id'], $this->_DI);
+	$personna['item']->setRuleset($this->_ruleset);
+      }
+      else{
+	$personna['item'] = new Headquarters($personna['current_item_id'], $this->_DI);
+      }
       $this->_data = $personna;
     }
     catch(Exception $e){
