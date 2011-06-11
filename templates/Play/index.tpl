@@ -16,6 +16,22 @@ endforeach;
 <?php 
 endif;
 ?>
+<table id="actionList">
+  <tr>
+    <th>Y</th>
+    <th>X</th>
+    <th><?=$lang->get('item')?></th>
+    <th><?=$lang->get('actions')?></th>
+  </tr>
+<?php 
+for($y = ($this->personna['Y'] + $this->ruleset['game.viewDistance']); $y >= ($this->personna['Y'] - $this->ruleset['game.viewDistance']); $y--):
+for($x = ($this->personna['X'] - $this->ruleset['game.viewDistance']); $x <= ($this->personna['X'] + $this->ruleset['game.viewDistance']); $x++):
+  if(!empty($this->viewData[$x][$y])):
+    $this->viewData[$x][$y]->display('actionlist');
+  endif;
+  endfor;
+ endfor;?>
+</table>
 <table id="mainBoard">
   <tr>
     <td>Y\X</td>

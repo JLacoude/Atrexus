@@ -108,7 +108,7 @@ class Personna extends DatabaseDriven implements IPersonna{
 	$personna['item']->setRuleset($this->_ruleset);
       }
       else{
-	$personna['item'] = new Headquarters($personna['current_item_id'], $this->_DI);
+	$personna['item'] = new Headquarter($personna['current_item_id'], $this->_DI);
       }
       $this->_data = $personna;
     }
@@ -149,6 +149,8 @@ class Personna extends DatabaseDriven implements IPersonna{
 	if(!empty($item['hq_id'])){
 	  $gameItem = new Headquarter($item['hq_id'], $this->_DI);
 	  $gameItem->costToCapture = $item['cost_to_capture'];
+	  $gameItem->X = $item['X'];
+	  $gameItem->Y = $item['Y'];
 	  $gameItem->isEnnemy = $this->_data['hive_id'] != $item['hq_hive'];
 	}
 	else{
