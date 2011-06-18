@@ -1,5 +1,9 @@
 html, body{
   background:#fff;
+  width:100%;
+  padding:0;
+  margin:0;
+  min-width:1000px;
 }
 
 table, tr, td, th{
@@ -7,16 +11,151 @@ table, tr, td, th{
   border: solid 1px #000;
 }
 
-#mainBoard td{
-  min-width: 4em;
-  height: 4em;
-  text-align:center;
+/* main menu */
+#mainMenu{
+  list-style-type:none;
+  padding:0;
+  margin:0;
+  background:#555;
+  color:#fff;
+  width:100%;
+  border-bottom:solid 2px #000;
 }
 
+#mainMenu li{
+  float:left;
+  padding:5px 1em;
+}
+
+#mainMenu li.last{
+  clear:both;
+  float:none;
+  padding:0;
+}
+
+#mainMenu li a{
+  color:#fff;
+  text-decoration:none;
+}
+
+#mainMenu li a:hover{
+  color:#ffc;
+  text-decoration:underline;
+}
+
+/* Game board */
+#statsAndLogs{
+  float:left;
+  width:auto;
+  border-right:dashed 1px #999;
+  max-width:50%;
+}
+
+#statsAndLogs .innerWrapper{
+  padding:0.5em 1em 1em;
+}
+
+#statsAndLogs h2{
+  font-size:1.2em;
+  margin:0.5em 0;
+  width:auto;
+  clear:both;
+}
+
+/* Player stats */
+#itemStats{
+  border:solid 1px;
+  width:auto;
+  float:left;
+  padding:0.3em;
+  margin:0 0 0.5em 0;
+}
+
+#itemStats dt{
+  float:left;
+  clear:left;
+  font-size:bold;
+}
+
+#itemStats dd{
+  float:left;
+  margin:0;
+}
+/* Log list */
+#logs{
+  list-style-type:none;
+  margin:0;
+  padding:0;
+  font-size:0.8em;
+  width:auto;
+}
+
+#logs li{
+  padding:0;
+  margin:0;
+}
+
+/* Action list */
+#actionList{
+float:left;
+width:auto;
+max-width:50%;
+}
+
+#actionList .innerWrapper{
+  padding: 0.5em  1em 1em;
+}
+
+#actionList h2{
+  font-size:1.2em;
+  margin:0.5em 0;
+  width:auto;
+}
+
+#actionList td p{
+  margin:0;
+}
+
+/* Main board */
+#mainBoard{
+clear:both;
+border-top:dashed 1px #999;
+margin-top:0.5em;
+padding:0 1em 1em;
+}
+
+#mainBoard h2{
+  font-size:1.2em;
+  margin:0.5em 0;
+}
+
+#mainBoard th{
+background:#555;
+color:#fff;
+}
+
+#mainBoard td{
+  min-width:3em;
+  height:3em;
+  text-align:center;
+  background:#fff;
+}
+
+#mainBoard td:hover{
+   background:#ccc;
+}
 #mainBoard th{
   text-align:center;
 }
 
-#mainBoard .ennemy{
-  background:#f66;
+#mainBoard table .foe{
+  background:#f77;
+}
+
+#mainBoard table .friend{
+  background:#afa;
+}
+
+#mainBoard table .current{
+  background:#ff7;
 }

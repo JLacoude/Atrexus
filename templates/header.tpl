@@ -5,8 +5,8 @@
   <link rel="stylesheet" type="text/css" href="css/main.css"/>
 </head>
 <body>
-<ul>
-  <li><a href="<?= Url::generate('')?>"><?=$lang->get('home')?></a></li>
+<ul id="mainMenu">
+  <li class="first"><a href="<?= Url::generate('')?>"><?=$lang->get('home')?></a></li>
   <li><a href="<?= Url::generate('Play')?>"><?=$lang->get('play')?></a></li>
   <?php if($user->isRegistered()):?>
   <li><a href="<?= Url::generate('Account')?>"><?=$lang->get('manageAccount')?></a></li>
@@ -15,6 +15,7 @@
   <li><a href="<?= Url::generate('Main', 'showLoginForm')?>"><?=$lang->get('login')?></a></li>
   <li><a href="<?= Url::generate('Register')?>"><?=$lang->get('register')?></a></li>
   <?php endif; ?>
+  <li class="last"></li>
 </ul>
 <?php if(!empty($messages['error'])):?>
 <ul class="errorMessages">

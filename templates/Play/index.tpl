@@ -1,11 +1,16 @@
+<div id="statsAndLogs">
+  <div class="innerWrapper">
+  <h2><?=$lang->get('statsTitle')?></h2>
 <dl id="itemStats">
   <dt><?=$lang->get('personnaAPTitle')?></dt>
   <dd><?=sprintf($lang->get('remainingAP'), $this->personna['AP'], $this->ruleset['personna.maxAp'])?></dd>
    <?php $this->personna['item']->display('itemStats');?>
+  <dd class="last"></dd>
 </dl>
 <?php
 if(!empty($this->personna['logs'])):
 ?>
+  <h2><?=$lang->get('logsTitle')?></h2>
 <ul id="logs">
 <?php
 foreach($this->personna['logs'] as $log):
@@ -16,7 +21,12 @@ endforeach;
 <?php 
 endif;
 ?>
-<table id="actionList">
+  </div>
+</div>
+<div  id="actionList">
+  <div class="innerWrapper">
+  <h2><?=$lang->get('actionsTitle')?></h2>
+<table>
   <tr>
     <th>Y</th>
     <th>X</th>
@@ -32,9 +42,13 @@ for($x = ($this->personna['X'] - $this->ruleset['game.viewDistance']); $x <= ($t
   endfor;
  endfor;?>
 </table>
-<table id="mainBoard">
+  </div>
+</div>
+<div  id="mainBoard">
+  <h2><?=$lang->get('viewTitle')?></h2>
+<table>
   <tr>
-    <td>Y\X</td>
+    <th>Y\X</th>
 <?php for($x = ($this->personna['X'] - $this->ruleset['game.viewDistance']); $x <= ($this->personna['X'] + $this->ruleset['game.viewDistance']); $x++):?>
     <th><?=$x?></th>
 <?php endfor;?>
@@ -50,4 +64,6 @@ for($x = ($this->personna['X'] - $this->ruleset['game.viewDistance']); $x <= ($t
 <?php endif;?>
 <?php endfor;?>
   </tr>
-<?php endfor;?> 
+<?php endfor;?>
+</table>
+</div> 

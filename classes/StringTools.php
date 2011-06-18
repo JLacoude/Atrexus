@@ -62,4 +62,13 @@ class StringTools{
     $phpass = new PasswordHash(8, true);
     return $phpass->CheckPassword($clear, $hashed);
   }
+
+  /**
+   * Filter some UTF8 string to use in a HTML document.
+   *
+   * @param string $tainted The string to filter
+   */
+  public static function filterForHTML($tainted){
+    return htmlspecialchars($tainted, ENT_COMPAT, "UTF-8");
+  }
 }

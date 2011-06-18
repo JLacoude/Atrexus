@@ -2,5 +2,4 @@
    <p><?php $this->_form->addInput('hidden', 'X', '', $this->X); ?>
     <?php $this->_form->addInput('hidden', 'Y', '', $this->Y); ?>
     <?php $this->_form->addInput('submit', '', '', $this->_lang->get('submitMove')); ?></p>
-   <p><?php echo sprintf($this->_lang->get('cost'), $this->cost);?></p>
 <?php $this->_form->end(); ?>
