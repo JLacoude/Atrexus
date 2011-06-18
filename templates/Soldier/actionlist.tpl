@@ -1,3 +1,4 @@
+<?php if($this->actions->count() > 0):?>
 <tr class="<?php if($this->isEnnemy):?> ennemy<?php endif;?><?php if($this->isCurrent):?> current<?php endif;?>">
   <td><?=$this->Y?></td>
   <td><?=$this->X?></td>
@@ -10,3 +11,4 @@ endforeach;
 ?>
   </td>
 </tr>
+<?php endif;?> 
