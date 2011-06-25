@@ -24,4 +24,4 @@
    <?php endforeach;?>
 </ul>
 <?php endif;?>
-
+<div id="content">

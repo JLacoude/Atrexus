@@ -11,11 +11,17 @@ table, tr, td, th{
   border: solid 1px #000;
 }
 
+ul{
+  list-style-type:none;
+}
+
+ul, li{
+  margin:0;
+  padding:0;
+}
+
 /* main menu */
 #mainMenu{
-  list-style-type:none;
-  padding:0;
-  margin:0;
   background:#555;
   color:#fff;
   width:100%;
@@ -41,6 +47,15 @@ table, tr, td, th{
 #mainMenu li a:hover{
   color:#ffc;
   text-decoration:underline;
+}
+
+/* Global content properties */
+#content{
+padding-left:1em;
+}
+
+#content h1{
+font-size:1.4em;
 }
 
 /* Game board */
@@ -83,23 +98,15 @@ table, tr, td, th{
 }
 /* Log list */
 #logs{
-  list-style-type:none;
-  margin:0;
-  padding:0;
   font-size:0.8em;
   width:auto;
 }
 
-#logs li{
-  padding:0;
-  margin:0;
-}
-
 /* Action list */
 #actionList{
-float:left;
-width:auto;
-max-width:50%;
+  float:left;
+  width:auto;
+  max-width:50%;
 }
 
 #actionList .innerWrapper{
@@ -118,10 +125,10 @@ max-width:50%;
 
 /* Main board */
 #mainBoard{
-clear:both;
-border-top:dashed 1px #999;
-margin-top:0.5em;
-padding:0 1em 1em;
+  clear:both;
+  border-top:dashed 1px #999;
+  margin-top:0.5em;
+  padding:0 1em 1em;
 }
 
 #mainBoard h2{
@@ -130,8 +137,8 @@ padding:0 1em 1em;
 }
 
 #mainBoard th{
-background:#555;
-color:#fff;
+  background:#555;
+  color:#fff;
 }
 
 #mainBoard td{
