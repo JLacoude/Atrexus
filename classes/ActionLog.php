@@ -45,6 +45,9 @@ class ActionLog implements IDisplayable{
    * @param array $datas Log datas
    */
   public function loadFromArray($datas){
+    if(empty($datas['login'])){
+      $datas['login'] = sprintf($this->_lang->get('anonymousUser'), $datas['user_id']);
+    }
     $this->_data = $datas;
   }
 
