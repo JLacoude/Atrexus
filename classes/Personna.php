@@ -41,12 +41,13 @@ class Personna extends DatabaseDriven implements IPersonna{
     $this->_db->beginTransaction();
     try{
       // Get position of a random headquarter
-      $stmt = $this->_db->fetchFirstRequest('getRandomHeadquarter', array(':hiveId' => $hiveId,
-									  ':battlefieldId' => $battlefieldId));
+      $headquarter = $this->_db->fetchFirstRequest('getRandomHeadquarter', array(':hiveId' => $hiveId,
+										 ':battlefieldId' => $battlefieldId));
       // Get ruleset data
       $maxAP = $this->_ruleset->get('personna.maxAp');
       // Create a personna for this battlefield
       $personnaId = $this->_db->executeCreateRequest('createPersonna', array(':userId' => $userId,
+									     ':battlefieldId' => $battlefieldId,
 									     ':hiveId' => $hiveId,
 									     ':positionId' => $headquarter['ID'],
 									     ':AP' => $maxAP));
