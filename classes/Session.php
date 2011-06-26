@@ -51,6 +51,9 @@ class Session implements ISessionManager{
    * @return string New session Id
    */
   public function newId($deleteOld = false){
+    if($deleteOld){
+      $_SESSION = array();
+    }
     return session_regenerate_id($deleteOld);
   }
 

@@ -112,7 +112,7 @@ class User extends DatabaseDriven{
 	$hasher = new PasswordHash(8, false);
 	if($hasher->checkPassword($pass, $userInfos['password'])){
 	    $this->_userInfos = $userInfos;
-	    $this->_sessionStoreUserId();
+	    $this->_sessionStoreUserId(true);
 	    $logged = true;
 	}
 	else{
@@ -262,10 +262,12 @@ class User extends DatabaseDriven{
 
   /**
    * Saves connected user's ID in session
+   *
+   * @param bool $deleteData specify if the old session data have to be erased, false by default
    */
-  private function _sessionStoreUserId(){
+  private function _sessionStoreUserId($deleteData = false){
+    $this->_sessionManager->newId($deleteData);
     $this->_sessionManager->set('userId', $this->_userInfos['ID']);
-    $this->_sessionManager->newId();
   }
 
   /**
