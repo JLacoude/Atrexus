@@ -71,27 +71,20 @@ class Personna extends DatabaseDriven implements IPersonna{
       if(empty($personna)){
 	throw(new Exception('Personna not found'));
       }
-      // Get ruleset data
-      $apGain = $this->_ruleset->get('personna.apGain');
-      $period = $this->_ruleset->get('game.period');
-      $maxAp = $this->_ruleset->get('personna.maxAp');
-      // New AP value
-      $ap = $personna['AP'] + $apGain / $period * $personna['time_from_last_regen'];
-      $ap = max(0, min($maxAp, $ap));
-      // If new AP < 100 we may have some seconds to remove from the time of last_regen
-      $secondsToRemove = 0;
-      if($ap < $maxAp){
-	$difference = ceil($ap) - $ap;
-	$secondsToRemove = $difference * $period / $apGain;
-	$ap = floor($ap);
+      // Update personna AP
+      $updatedAP = APHelpers::update($this->_ruleset->get('personna.maxAp'),
+				     $this->_ruleset->get('game.period'),
+				     $this->_ruleset->get('personna.apGain'),
+				     $personna['AP'],
+				     $personna['time_from_last_regen']);
+      if($updatedAP['ap'] != $personna['AP']){
+	$this->_db->executeRequest('updatePersonna', array(':id' => $id,
+							   ':ap' => $updatedAP['ap'],
+							   ':toRemove' => $updatedAP['toRemove']));
+	$personna['AP'] = $updatedAP['ap'];
       }
 
-      if($ap != $personna['AP']){
-	$this->_db->executeRequest('updatePersonna', array(':id' => $id,
-							   ':ap' => $ap,
-							   ':toRemove' => $secondsToRemove));
-	$personna['AP'] = $ap;
-      }
+      // Get logs
       $personna['logs'] = array();
       $logs = $this->_db->fetchAllRequest('getPersonnaLogs', array(':userId' => $personna['user_id'],
 								   ':battlefieldId' => $personna['battlefield_id'],
@@ -106,6 +99,7 @@ class Personna extends DatabaseDriven implements IPersonna{
       if($personna['is_soldier']){
 	$personna['item'] = new Soldier($personna['current_item_id'], $this->_DI);
 	$personna['item']->setRuleset($this->_ruleset);
+	$personna['item']->updateAP();
       }
       else{
 	$personna['item'] = new Headquarter($personna['current_item_id'], $this->_DI);

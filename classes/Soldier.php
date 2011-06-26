@@ -42,4 +42,24 @@ class Soldier extends GameItem{
       return false;
     }
   }
+
+  /**
+   * Updates soldier's AP if needed
+   */
+  public function updateAP(){
+    $apGain = $this->_ruleset->get('soldier.apGain');
+    $period = $this->_ruleset->get('game.period');
+    $maxAp = $this->_ruleset->get('soldier.maxAp');
+    $updatedAP = APHelpers::update($this->_ruleset->get('soldier.maxAp'),
+				   $this->_ruleset->get('game.period'),
+				   $this->_ruleset->get('soldier.apGain'),
+				   $this->AP,
+				   $this->time_from_last_regen);
+    if($updatedAP['ap'] != $this->AP){
+      $this->_db->executeRequest('updateSoldierAP', array(':id' => $this->ID,
+							  ':ap' => $updatedAP['ap'],
+							  ':toRemove' => $updatedAP['toRemove']));
+      $this->AP = $updatedAP['ap'];
+    }
+  }
 }

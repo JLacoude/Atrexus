@@ -15,9 +15,9 @@ class GameItem extends DatabaseDriven implements IDisplayable{
 
   /**
    * @var object Instance of IConfig object storing the rulesets
-   * @access private
+   * @access protected
    */
-  private $_ruleset;
+  protected $_ruleset;
 
   /**
    * An ILanguage instance.
