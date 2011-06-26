@@ -16,4 +16,11 @@ class Battlefields extends Controller{
     $battlefieldList = new BattlefieldList($this->_DI);
     $this->availableBattlefields = $battlefieldList->getListForUser($this->_user);
   }
+
+  public function leave(){
+    if($this->_user->isPlaying()){
+      $this->_user->exitBattlefield();
+    }
+    Url::redirect(Url::generate('Play'));
+  }
 }

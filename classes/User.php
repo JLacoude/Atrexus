@@ -315,6 +315,14 @@ class User extends DatabaseDriven{
   }
 
   /**
+   * Used to get a user out of a battlefield
+   */
+  public function exitBattlefield(){
+    $this->_personna = null;
+    $this->_sessionManager->set('personnaId', 0);
+  }
+
+  /**
    * Creates a soldier on current battlefield
    *
    * @param int $X X coordinate of the soldier to create

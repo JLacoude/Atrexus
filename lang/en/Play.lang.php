@@ -1,9 +1,10 @@
 <?php
-$lines = array('personnaAPTitle' => 'Action points:',
-	       'statsTitle' => 'Statistics',
-	       'logsTitle' => 'Logs',
+$lines = array('actions' => 'Actions',
 	       'actionsTitle' => 'Actions',
-	       'viewTitle' => 'Your view',
-	       'remainingAP' => '%s/%s AP',
+	       'exitBattlefield' => 'Leave Battlefield',
 	       'item' => 'Item',
-	       'actions' => 'Actions');
+	       'logsTitle' => 'Logs',
+	       'personnaAPTitle' => 'Action points:',
+	       'remainingAP' => '%s/%s AP',
+	       'statsTitle' => 'Statistics',
+	       'viewTitle' => 'Your view');

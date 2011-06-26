@@ -26,6 +26,9 @@ endif;
 <div  id="actionList">
   <div class="innerWrapper">
   <h2><?=$lang->get('actionsTitle')?></h2>
+<?php $this->_form->start(Url::generate('Battlefields', 'leave')); ?>
+   <p><?php $this->_form->addInput('submit', '', '', $this->_lang->get('exitBattlefield')); ?></p>
+<?php $this->_form->end(); ?>  
 <table>
   <tr>
     <th>Y</th>
