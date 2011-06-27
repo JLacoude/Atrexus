@@ -58,6 +58,14 @@ padding-left:1em;
 font-size:1.4em;
 }
 
+#content h2{
+font-size:1.2em;
+}
+
+.textWall{
+max-width:800px;
+}
+
 /* Game board */
 #statsAndLogs{
   float:left;
