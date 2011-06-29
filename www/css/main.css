@@ -97,7 +97,7 @@ max-width:800px;
 #itemStats dt{
   float:left;
   clear:left;
-  font-size:bold;
+  font-weight:bold;
 }
 
 #itemStats dd{

@@ -3,6 +3,7 @@
 <head>
   <title><?=$config->get('html.defaultTitle')?></title>
   <link rel="stylesheet" type="text/css" href="css/main.css"/>
+  <meta http-equiv="Content-Type" content="text/html; charset=<?=$config->get('html.charset')?>">
 </head>
 <body>
 <ul id="mainMenu">
@@ -21,6 +22,13 @@
 <ul class="errorMessages">
   <?php foreach($messages['error'] as $error):?>
   <li><?= $error?></li>
+   <?php endforeach;?>
+</ul>
+<?php endif;?>
+<?php if(!empty($messages['success'])):?>
+<ul class="successMessages">
+  <?php foreach($messages['success'] as $success):?>
+  <li><?= $success?></li>
    <?php endforeach;?>
 </ul>
 <?php endif;?>

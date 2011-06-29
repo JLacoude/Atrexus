@@ -38,7 +38,7 @@ class Main extends Controller{
     if(empty($posted)){
       $this->_messenger->add('error', $this->_lang->get('invalidForm'));
     }
-    if($this->_user->loginByUserPass($posted['login'], $posted['password'])){
+    else if($this->_user->loginByUserPass($posted['login'], $posted['password'])){
       $redirectTo = Url::generate('');
     }
     $this->_messenger->saveInSession();

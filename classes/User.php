@@ -385,4 +385,68 @@ class User extends DatabaseDriven{
     }
     $this->_personna->captureHeadquarter($headquarterId);
   }
+
+  /**
+   * Change user's password
+   *
+   * @param string $currentPassword Current user password to check if it can be changed
+   * @param string $newPassword New password
+   */
+  public function changePassword($currentPassword, $newPassword){
+    $this->_db->beginTransaction();
+    try{
+      $userInfos = $this->_db->fetchFirstRequest('getUserPassword', array(':id' => $this->_userInfos['ID']));
+      if(!empty($userInfos)){
+	$hasher = new PasswordHash(8, false);
+	if($hasher->checkPassword($currentPassword, $userInfos['password'])){
+	  $hashedPassword = $hasher->hashPassword($newPassword);
+	  if(!empty($hashedPassword)){
+	    $this->_db->executeRequest('changeUserPassword', array(':password' => $hashedPassword,
+								   ':id' => $this->_userInfos['ID']));
+	  }
+	  else{
+	    $this->_messenger->add('error', $this->_lang->get('passwordMiscError'));
+	  }
+	}
+	else{
+	  $this->_messenger->add('error', $this->_lang->get('wrongPassword'));
+	}
+      }
+    }
+    catch(Exception $e){
+      $this->_db->rollBack();
+      throw($e);
+    }
+    $this->_db->commit();
+    return true;
+  }
+
+  /**
+   * Change user's email
+   *
+   * @param string $currentPassword Current user password to check if it can be changed
+   * @param string $newEmail New Email
+   */
+  public function changeEmail($currentPassword, $newEmail){
+    $this->_db->beginTransaction();
+    try{
+      $userInfos = $this->_db->fetchFirstRequest('getUserPassword', array(':id' => $this->_userInfos['ID']));
+      if(!empty($userInfos)){
+	$hasher = new PasswordHash(8, false);
+	if($hasher->checkPassword($currentPassword, $userInfos['password'])){
+	  $this->_db->executeRequest('changeUserEmail', array(':email' => $newEmail,
+							      ':id' => $this->_userInfos['ID']));
+	}
+	else{
+	  $this->_messenger->add('error', $this->_lang->get('wrongPassword'));
+	}
+      }
+    }
+    catch(Exception $e){
+      $this->_db->rollBack();
+      throw($e);
+    }
+    $this->_db->commit();
+    return true;
+  }
 }
