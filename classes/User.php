@@ -107,20 +107,28 @@ class User extends DatabaseDriven{
     $logged = false;
     $this->_db->beginTransaction();
     try{
-      $userInfos = $this->_db->fetchFirstRequest('getUserByLogin', array(':login' => $login));
-      if(!empty($userInfos)){
-	$hasher = new PasswordHash(8, false);
-	if($hasher->checkPassword($pass, $userInfos['password'])){
+      $timeBeforeNextLogin = $this->timeBeforeNextLogin();
+      $this->_addAttempt();
+      if($timeBeforeNextLogin > 0){
+	$this->_messenger->add('error', sprintf($this->_lang->get('tooManyAttempts'), floor($timeBeforeNextLogin/60), $timeBeforeNextLogin%60));
+      }
+      else{
+	$userInfos = $this->_db->fetchFirstRequest('getUserByLogin', array(':login' => $login));
+	if(!empty($userInfos)){
+	  $hasher = new PasswordHash(8, false);
+	  if($hasher->checkPassword($pass, $userInfos['password'])){
 	    $this->_userInfos = $userInfos;
 	    $this->_sessionStoreUserId(true);
 	    $logged = true;
+	    $this->_resetAttempts();
+	  }
+	  else{
+	    $this->_messenger->add('error', $this->_lang->get('wrongPassword'));
+	  }
 	}
 	else{
-	  $this->_messenger->add('error', $this->_lang->get('wrongPassword'));
+	  $this->_messenger->add('error', $this->_lang->get('loginNotFound'));
 	}
-      }
-      else{
-	$this->_messenger->add('error', $this->_lang->get('loginNotFound'));
       }
     }
     catch(Exception $e){
@@ -448,5 +456,37 @@ class User extends DatabaseDriven{
     }
     $this->_db->commit();
     return true;
+  }
+
+  /**
+   * Returns the number of seconds until next login attempt is available
+   *
+   * @return int number of seconds until next attempt
+   */
+  public function timeBeforeNextLogin(){
+    $clientIp = $this->_getClientIp();
+    $loginTriesInfos = $this->_db->fetchFirstRequest('getLoginTries', array(':ip' => $clientIp));
+    if(empty($loginTriesInfos) || 
+	    $loginTriesInfos['counter'] < 5 ||
+	    $loginTriesInfos['seconds_from_last'] > pow(10, $loginTriesInfos['counter'] - 4)){
+      return 0;
+    }
+    return  pow(10, $loginTriesInfos['counter'] - 4) - $loginTriesInfos['seconds_from_last'];
+  }
+
+  /**
+   * Updates user login attempts
+   */
+  private function _addAttempt(){
+    $clientIp = $this->_getClientIp();
+    $this->_db->executeRequest('addLoginAttempt', array(':ip' => $clientIp));
+  }
+
+  /**
+   * Resets a user attempts counter
+   */
+  private function _resetAttempts(){
+    $clientIp = $this->_getClientIp();
+    $this->_db->executeRequest('resetLoginAttempt', array(':ip' => $clientIp));
   }
 }

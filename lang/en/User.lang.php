@@ -5,4 +5,5 @@ $lines = array('alreadyRegistered' => 'Your account is already registered',
 	       'registerUserError' => 'There was an error during registration',
 	       'wrongPassword' => 'Wrong password',
 	       'notInGame' => 'Not in game',
+	       'tooManyAttempts' => 'Too many failed login, wait for %s minutes and %s seconds',
 	       'loginNotFound' => 'Login name not found');

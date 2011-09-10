@@ -24,6 +24,7 @@ class Main extends Controller{
    * Used to display login form
    */
   public function showLoginForm(){
+    $this->timeBeforeNextLogin = $this->_user->timeBeforeNextLogin();
   }
 
   /**
@@ -39,7 +40,7 @@ class Main extends Controller{
       $this->_messenger->add('error', $this->_lang->get('invalidForm'));
     }
     else if($this->_user->loginByUserPass($posted['login'], $posted['password'])){
-      $redirectTo = Url::generate('');
+      $redirectTo = Url::generate('Play');
     }
     $this->_messenger->saveInSession();
     Url::redirect($redirectTo);
