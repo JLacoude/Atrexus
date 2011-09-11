@@ -2,7 +2,7 @@
 #
 # Portable PHP password hashing framework.
 #
-# Version 0.3 / genuine.
+# Version 0.3 / atrexus 0.1.
 #
 # Written by Solar Designer <solar at openwall.com> in 2004-2006 and placed in
 # the public domain.  Revised in subsequent years, still public domain.
@@ -23,6 +23,8 @@
 #
 # Obviously, since this code is in the public domain, the above are not
 # requirements (there can be none), but merely suggestions.
+#
+# Atrexus 0.1 : changed class name to be like the other classes of the project
 #
 class PasswordHash {
 	var $itoa64;
@@ -249,5 +251,3 @@ class PasswordHash {
 		return $hash == $stored_hash;
 	}
 }
-
-?>

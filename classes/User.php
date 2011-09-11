@@ -489,4 +489,124 @@ class User extends DatabaseDriven{
     $clientIp = $this->_getClientIp();
     $this->_db->executeRequest('resetLoginAttempt', array(':ip' => $clientIp));
   }
+
+  /**
+   * Creates a reset password token for an account identified either by a login or an email.
+   *
+   * @param string $login User login
+   * @param string $meail User email
+   *
+   * @return boolean
+   * @todo replace the call to mail() by a proper mailer class
+   */
+  public function createResetToken($login, $email){
+    $result = false;
+    $this->_db->beginTransaction();
+    try{
+      if(!empty($login)){
+	$account = $this->_db->fetchFirstRequest('getUserByLogin', array(':login' => $login));
+	if(!empty($account['email'])){
+	  $email = $account['email'];
+	}
+      }
+
+      if(empty($email)){
+	if(empty($account)){
+	  $this->_messenger->add('error', $this->_lang->get('loginNotFound'));
+	}
+	else{
+	  $this->_messenger->add('error', $this->_lang->get('accountWithoutEmail'));
+	}
+	return false;
+      }
+      else{
+	if(empty($account)){
+	  $account = $this->_db->fetchFirstRequest('getUserByEmail', array(':email' => $email));
+	}
+	if(empty($account)){
+	  $this->_messenger->add('error', $this->_lang->get('emailNotFound'));
+	}
+	else{
+	  do{
+	    $token = StringTools::generateToken();
+	    $alreadyExists = $this->_db->fetchFirstRequest('getPasswordResetByToken', array(':token' => $token));
+	  }while(!empty($alreadyExists));
+	  $this->_db->executeRequest('createPasswordReset', array(':token' => $token, ':userId' => $account['ID']));
+	  $to = str_replace(array("\r", "\n", "%0a", "%0d"), '', $email);
+	  $subject = $this->_lang->get('resetMailTitle');
+	  $body = sprintf($this->_lang->get('resetMailBody'), $account['login'], Url::generate('Account', 'showPasswordSetForm', '&', array('token' => $token)));
+	  if(mail($to, $subject, $body, 'From: Atrexus <noreply@atrexus.com>'."\n\r")){
+	    $result = true;
+	  }
+	  else{
+	    $this->_messenger->add('error', $body);
+	    $this->_messenger->add('error', $this->_lang->get('emailNotSent'));
+	  }
+	}
+      }
+    }
+    catch(Exception $e){
+      $this->_db->rollBack();
+      throw($e);
+    }
+    $this->_db->commit();
+    return $result;
+  }
+
+  /**
+   * Checks if a token to reset password exists and is not too old
+   *
+   * @param string $token Token to check
+   * @return bool
+   */
+  public function checkToken($token){
+    $exists = false;
+    $this->_db->beginTransaction();
+    try{
+      $tokenData = $this->_db->fetchFirstRequest('getPasswordResetByToken', array(':token' => $token));
+      if(!empty($tokenData)){
+	$exists = true;
+      }
+    }
+    catch(Exception $e){
+      $this->_db->rollBack();
+      throw($e);
+    }
+    $this->_db->commit();
+    return $exists;
+  }
+
+  /**
+   * Set a new password to an user account
+   *
+   * @param string $token Password token used to reset the account
+   * @param string $password New password
+   * @return bool
+   */
+  public function setNewPassword($token, $password){
+    $changed = false;
+    $this->_db->beginTransaction();
+    try{
+      $tokenData = $this->_db->fetchFirstRequest('getPasswordResetByToken', array(':token' => $token));
+      if(!empty($tokenData)){
+	$hasher = new PasswordHash(8, false);
+	$hashedPassword = $hasher->hashPassword($password);
+	if(!empty($hashedPassword)){
+	  $this->_db->executeRequest('changeUserPassword', array(':password' => $hashedPassword,
+								 ':id' => $tokenData['user_id']));
+	  $this->_db->executeRequest('cleanTokens', array(':userId' => $tokenData['user_id']));
+	  $changed = true;
+	}
+	else{
+	  $this->_messenger->add('error', $this->_lang->get('passwordMiscError'));
+	}
+      }
+    }
+    catch(Exception $e){
+      $this->_db->rollBack();
+      throw($e);
+    }
+    $this->_db->commit();
+    return $changed;
+  }
 }

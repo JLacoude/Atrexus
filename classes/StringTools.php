@@ -71,4 +71,13 @@ class StringTools{
   public static function filterForHTML($tainted){
     return htmlspecialchars($tainted, ENT_COMPAT, "UTF-8");
   }
+
+  /**
+   * Generates a random alpha numeric token
+   *
+   * @return string
+   */
+  public static function generateToken(){
+    return sha1(mt_rand());
+  }
 }

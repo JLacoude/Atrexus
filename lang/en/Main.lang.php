@@ -1,10 +1,11 @@
 <?php
 $lines = array('login' => 'Login',
-	       'username' => 'Username',
-	       'pass' => 'Password',
+	       'loginTitle' => 'Login',
+	       'username' => 'Username: ',
+	       'lostPassword' => 'Lost Password',
+	       'pass' => 'Password: ',
 	       'login' => 'Connect',
 	       'register' => 'Create a new account',
-	       'lost' => 'Lost password',
 	       'homeTitle' => 'Atrexus',
 	       'tooManyAttempts' => 'Too many failed login, wait for %s minutes and %s seconds',
 	       'homeDesc' => '<h2>Welcome</h2>
