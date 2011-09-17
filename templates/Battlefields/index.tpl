@@ -16,6 +16,7 @@
    <?=sprintf($lang->get('availableAP'), $battlefield['AP'])?>
     <?php endif;?>
     <?php $form->addInput('submit', '', '', $lang->get('enterBattlefield')); ?>
+    <a href="<?=Url::generate('Battlefields', 'showMap', '&amp;', array('battlefieldId' => $battlefield['ID']))?>"><?=$lang->get('seeMap')?></a>
   </p>
  <?php $form->end(); ?>
 </li>

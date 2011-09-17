@@ -49,6 +49,7 @@ for($x = ($this->personna['X'] - $this->ruleset['game.viewDistance']); $x <= ($t
 </div>
 <div  id="mainBoard">
   <h2><?=$lang->get('viewTitle')?></h2>
+<p><a href="<?=Url::generate('Battlefields', 'showMap', '&amp;', array('battlefieldId' => $this->personna['battlefield_id']))?>"><?=$lang->get('seeMap')?></a></p>
 <table>
   <tr>
     <th>Y\X</th>

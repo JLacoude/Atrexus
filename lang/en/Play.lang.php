@@ -7,4 +7,5 @@ $lines = array('actions' => 'Actions',
 	       'personnaAPTitle' => 'Action points:',
 	       'remainingAP' => '%s/%s AP',
 	       'statsTitle' => 'Statistics',
+	       'seeMap' => 'See the map of the battlefield',
 	       'viewTitle' => 'Your view');

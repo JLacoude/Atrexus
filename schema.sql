@@ -65,7 +65,9 @@ CREATE TABLE IF NOT EXISTS `hives` (
   `ID` int(11) unsigned NOT NULL AUTO_INCREMENT,
   `name` varchar(255) NOT NULL,
   `battlefield_id` int(11) unsigned NOT NULL,
+  `color` varchar(255) NOT NULL,
   PRIMARY KEY (`ID`),
+  UNIQUE KEY `hive_color` (`battlefield_id`,`color`),
   KEY `battlefield_id` (`battlefield_id`)
 ) ENGINE=InnoDB  DEFAULT CHARSET=utf8;
 

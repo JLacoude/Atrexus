@@ -23,4 +23,16 @@ class Battlefields extends Controller{
     }
     Url::redirect(Url::generate('Play'));
   }
+
+  /**
+   * Generate and shows a battlefield global map
+   */
+  public function showMap(){
+    $battlefieldId = filter_input(INPUT_GET, 'battlefieldId', FILTER_SANITIZE_NUMBER_INT);
+    $battlefield = new Battlefield($this->_DI, $battlefieldId);
+    $battlefieldData = $battlefield->getData();
+    $this->picturePath = $battlefield->generateMap();
+    $this->battlefieldName = $battlefieldData['name'];
+    $this->hives = $battlefieldData['hives'];
+  }
 }

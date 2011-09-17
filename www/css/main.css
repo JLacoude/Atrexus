@@ -174,3 +174,27 @@ max-width:800px;
 #mainBoard table .current{
   background:#ff7;
 }
+
+/* Battlefield map */
+.mapBox img.map{
+    float:left;
+    border:ridge 3px #ccc;
+}
+
+.mapBox .legend{
+    float:left;
+    border:solid 1px #ccc;
+    padding:10px;
+    margin: 30px 0 0 15px;
+}
+
+.mapBox .clearer{
+    clear:both;
+}
+
+.mapBox .legend .colorLegend{
+    display:inline-block;
+    width:1em;
+    height:1em;
+    border:solid 1px #000;
+}

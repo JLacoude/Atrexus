@@ -58,13 +58,13 @@ INSERT INTO `headquarters` (`ID`, `hive_id`, `position_id`, `cost_to_capture`) V
 -- Dumping data for table `hives`
 --
 
-INSERT INTO `hives` (`ID`, `name`, `battlefield_id`) VALUES
-(1, 'Iurida', 1),
-(2, 'Orthosterni', 1),
-(3, 'Chaerilida', 1),
-(4, 'Palpigradi ', 2),
-(5, 'Opiliones', 2),
-(6, 'Haptopoda', 2);
+INSERT INTO `hives` (`ID`, `name`, `battlefield_id`, `color`) VALUES
+(1, 'Iurida', 1, 'a:2:{s:7:"soldier";a:3:{s:1:"r";i:255;s:1:"g";i:160;s:1:"b";i:160;}s:2:"hq";a:3:{s:1:"r";i:255;s:1:"g";i:0;s:1:"b";i:0;}}'),
+(2, 'Orthosterni', 1, 'a:2:{s:7:"soldier";a:3:{s:1:"r";i:160;s:1:"g";i:255;s:1:"b";i:160;}s:2:"hq";a:3:{s:1:"r";i:0;s:1:"g";i:255;s:1:"b";i:0;}}'),
+(3, 'Chaerilida', 1, 'a:2:{s:7:"soldier";a:3:{s:1:"r";i:160;s:1:"g";i:160;s:1:"b";i:255;}s:2:"hq";a:3:{s:1:"r";i:0;s:1:"g";i:0;s:1:"b";i:255;}}'),
+(4, 'Palpigradi ', 2, 'a:2:{s:7:"soldier";a:3:{s:1:"r";i:255;s:1:"g";i:160;s:1:"b";i:160;}s:2:"hq";a:3:{s:1:"r";i:255;s:1:"g";i:0;s:1:"b";i:0;}}'),
+(5, 'Opiliones', 2, 'a:2:{s:7:"soldier";a:3:{s:1:"r";i:160;s:1:"g";i:255;s:1:"b";i:160;}s:2:"hq";a:3:{s:1:"r";i:0;s:1:"g";i:255;s:1:"b";i:0;}}'),
+(6, 'Haptopoda', 2, 'a:2:{s:7:"soldier";a:3:{s:1:"r";i:160;s:1:"g";i:160;s:1:"b";i:255;}s:2:"hq";a:3:{s:1:"r";i:0;s:1:"g";i:0;s:1:"b";i:255;}}');
 
 --
 -- Dumping data for table `positions`
